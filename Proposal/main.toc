@@ -1,0 +1,12 @@
+\select@language {english}
+\contentsline {section}{Introduction}{2}
+\contentsline {subsection}{Use Case}{2}
+\contentsline {subsection}{Applications}{3}
+\contentsline {section}{Previous Work}{3}
+\contentsline {section}{Approach}{4}
+\contentsline {subsection}{Development Plan}{4}
+\contentsline {subsection}{Equipment}{5}
+\contentsline {subsection}{Preprocessing}{6}
+\contentsline {subsection}{Piece Matching}{7}
+\contentsline {section}{Evaluation}{10}
+\contentsline {section}{References}{10}
