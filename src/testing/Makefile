@@ -12,3 +12,7 @@ hello_world: hello_world.o
 
 hello_world.o: hello_world.cpp
 	$(CPP) -c hello_world.cpp
+
+clean: 
+	rm hello;
+	rm DisplayImage

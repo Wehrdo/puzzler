@@ -14,3 +14,4 @@ opencv:
 clean:
 	(cd testing; make clean)
 	(cd lib; make clean)
+	(cd opencv; rm -rf build)
