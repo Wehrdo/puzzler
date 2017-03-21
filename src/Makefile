@@ -9,7 +9,7 @@ lib:
 	(cd lib; make all)
 
 opencv:
-	(unzip opencv-3.2.0; cd opencv-3.2.0;mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release ..; make -j7)
+	(cd opencv; git fetch --all --tags --prune; git checkout tags/3.2.0; mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release ..; make -j7)
 
 clean:
 	(cd testing; make clean)
