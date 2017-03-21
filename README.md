@@ -1,4 +1,7 @@
-The Puzzler
-CprE 575
+# The Puzzler
+## CprE 575
 
-Hello World
+---
+
+## Setup:
+1. 
