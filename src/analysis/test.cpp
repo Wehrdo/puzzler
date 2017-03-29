@@ -16,7 +16,7 @@ std::vector<Vec2d> gen_curve(int N, std::function<double(double)> func) {
 double identity(double x) {return x;}
 
 int main(int argc, char* argv[]) {
-    int N = 16;
-    auto points = gen_curve(N, identity);
+    int N = 24;
+    auto points = gen_curve(N, sin);
     auto inflection = find_inflections(points);
 };

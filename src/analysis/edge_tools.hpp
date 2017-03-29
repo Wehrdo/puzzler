@@ -45,13 +45,9 @@ typedef Vec2<double> Vec2d;
 
 template <typename T>
 double calc_angle(Vec2<T> a, Vec2<T> b) {
-    T denom = a.norm() * b.norm();
-    if (denom == 0) {
-        return 0;
-    } else {
-        printf("%f--%f---", a*b, denom);
-        return acos(a*b / denom);
-    }
+    T y_diff = b.y = a.y;
+    T x_diff = b.x = a.x;
+    return atan2(y_diff, x_diff);
 };
 
 // Returns indices of inflection points
@@ -61,12 +57,12 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     if (N < 3) {
         return std::vector<std::size_t>();
     }
-    Vec2<T> last_vec = points[1] - points[0];
+    Vec2<T> last_vec = points[0] - points[N-1];
     std::vector<std::size_t> inflections;
-    for (std::size_t i = 2; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         Vec2<T> new_vec = points[i] - points[i-1];
         double angle = calc_angle(new_vec, last_vec);
-        printf("angle: %lf\n", angle);
+        double raw_angle = calc_angle(new_vec, Vec2d(1,0));
         last_vec = new_vec;
     }
     return inflections;
