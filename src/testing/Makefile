@@ -1,5 +1,5 @@
 CPP=g++
-CFLAGS=-I../opencv/build
+CFLAGS=-I../opencv/build --std=c++11
 LIBS=`pkg-config --libs opencv`
 
 all: hello_world display_image points_test get_points
