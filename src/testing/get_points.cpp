@@ -22,14 +22,12 @@ int main( int argc, char* argv[] )
    // convert to BW
    cvtColor( src, src, CV_BGR2GRAY );
    src = src > 100;
+   imwrite("../../images/out/get_points_out_bw.png", src );
 
-   // Find contours
    Mat temp = src.clone();
+   // Vector of groups of contours
    vector<vector<Point>> contours;
-   vector<Vec4i> hierarchy;
-   double contour_area;
-   double threshold = 5;
-   vector<int> too_small;
+   double threshold = 3.0;
 
    // CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
    //  That is, any 2 subsequent points (x1,y1) and (x2,y2) of the contour
@@ -41,19 +39,33 @@ int main( int argc, char* argv[] )
    // CV_CHAIN_APPROX_TC89_L1,CV_CHAIN_APPROX_TC89_KCOS applies one of
    //  the flavors of the Teh-Chin chain approximation algorithm.
    cout << "Finding contours" << endl;
-   findContours(temp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+   findContours(temp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-   Mat output(src.size(), CV_BW, Scalar(255,255,255);
-   // find small contours
-   cout << "Finding large contours" << endl;
+   // White canvas to output onto
+   Mat output(src.size(), CV_8UC1, Scalar(255,255,255));
+
+   //find small contours and ignore them
+   cout << "Finding large contours.\nFound " << contours.size() << " contours." << endl;
    for(int i = 0; i < contours.size(); i++ )
       {
-      contour_area = contourArea(contours[i]);
-      if(contour_area > threshold)
+      cout << "Checking contour: " << i << endl;
+      if( contours[i].size() < 20)
+      // if( contours[i].size() < 100 )
          {
-         drawContours(output, contours, i, Scalar(0), CV_FILLED, 8 );
+         //Erase garbage
+         cout << "Erasing contour " << i << endl;
+         contours.erase(contours.begin() + i);
+         continue;
          }
+      cout << "\n\tHas area: " << contourArea(contours[i]) << endl;
+      cout << "\n\tHas size: " << contours[i].size() << endl;
+      //Scalar color( rand()&255, rand()&255, rand()&255 );
+      Scalar color( 0, 0, 0 );
+      drawContours( output, contours, i, color, CV_FILLED);
       }
+
+   cout << "Drawing contours" << endl;
+
 
 
    // Display image
@@ -62,6 +74,7 @@ int main( int argc, char* argv[] )
    imshow( test_win, output );
    resizeWindow( test_win, 400, 800 );
 
+   // Write output to file
    imwrite("../../images/out/get_points_out.png", output );
 
    waitKey(0);
