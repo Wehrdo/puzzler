@@ -27,7 +27,9 @@ int main( int argc, char** argv )
 
   /// Create Window
   char* source_window = "Source";
-  namedWindow( source_window, CV_WINDOW_AUTOSIZE );
+  namedWindow( source_window, CV_WINDOW_NORMAL );
+  resizeWindow( source_window, 800, 800 );
+
   imshow( source_window, src );
 
   createTrackbar( " Canny thresh:", "Source", &thresh, max_thresh, thresh_callback );

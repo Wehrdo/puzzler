@@ -27,7 +27,10 @@ int main( int argc, char* argv[] )
    Mat temp = src.clone();
    // Vector of groups of contours
    vector<vector<Point>> contours;
-   double threshold = 3.0;
+
+   double threshold = 10000.0;
+   double size_factor = 2.0;
+
 
    // CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
    //  That is, any 2 subsequent points (x1,y1) and (x2,y2) of the contour
@@ -46,27 +49,46 @@ int main( int argc, char* argv[] )
 
    //find small contours and ignore them
    cout << "Finding large contours.\nFound " << contours.size() << " contours." << endl;
-   for(int i = 0; i < contours.size(); i++ )
+   double average_size = 0.0;
+   int i;
+   for(i = 0; i < contours.size(); i++ )
       {
       cout << "Checking contour: " << i << endl;
-      if( contours[i].size() < 20)
-      // if( contours[i].size() < 100 )
+      // Discount anything that is smaller thatn 10 000
+      if( contourArea(contours[i]) < threshold )
          {
          //Erase garbage
          cout << "Erasing contour " << i << endl;
          contours.erase(contours.begin() + i);
+         i--;
          continue;
          }
       cout << "\n\tHas area: " << contourArea(contours[i]) << endl;
       cout << "\n\tHas size: " << contours[i].size() << endl;
-      //Scalar color( rand()&255, rand()&255, rand()&255 );
-      Scalar color( 0, 0, 0 );
-      drawContours( output, contours, i, color, CV_FILLED);
+      average_size += contourArea(contours[i]);
+
+      }
+
+   // Calculate average size of large-ish objects
+   average_size /= i;
+
+   cout << "Found average size to be: " << average_size << endl;
+
+   // remove abnormally sized objects
+   for(i = 0; i < contours.size(); i++ )
+      {
+      if( contourArea(contours[i]) > (average_size*size_factor) )
+         {
+         contours.erase(contours.begin() + i );
+         i--;
+         }
       }
 
    cout << "Drawing contours" << endl;
 
-
+   Scalar color( rand()&200, rand()&200, rand()&200 );
+   //Scalar color( 0, 0, 0 );
+   drawContours( output, contours, -1, color, CV_FILLED);
 
    // Display image
    char* test_win = "Test";
