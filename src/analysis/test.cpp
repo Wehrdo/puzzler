@@ -7,7 +7,7 @@
 std::vector<Vec2d> gen_curve(int N, std::function<double(double)> func) {
     std::vector<Vec2d> points;
     for (int i = 0; i < N; i++) {
-        double x = M_PI * ((double)i / N);
+        double x = 2 * M_PI * ((double)i / N);
         points.push_back(Vec2d(x, func(x)));
     }
     return points;

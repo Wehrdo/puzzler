@@ -45,8 +45,8 @@ typedef Vec2<double> Vec2d;
 
 template <typename T>
 double calc_angle(Vec2<T> a, Vec2<T> b) {
-    T y_diff = b.y = a.y;
-    T x_diff = b.x = a.x;
+    T y_diff = b.y - a.y;
+    T x_diff = b.x - a.x;
     return atan2(y_diff, x_diff);
 };
 
@@ -57,13 +57,15 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     if (N < 3) {
         return std::vector<std::size_t>();
     }
-    Vec2<T> last_vec = points[0] - points[N-1];
+    double last_angle = calc_angle(points[0] - points[N-1], Vec2d(1,0));
     std::vector<std::size_t> inflections;
     for (std::size_t i = 0; i < N; ++i) {
         Vec2<T> new_vec = points[i] - points[i-1];
-        double angle = calc_angle(new_vec, last_vec);
+        // double angle = calc_angle(new_vec, last_vec);
         double raw_angle = calc_angle(new_vec, Vec2d(1,0));
-        last_vec = new_vec;
+        double angle_diff = raw_angle - last_angle;
+        printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
+        last_angle = raw_angle;
     }
     return inflections;
 };

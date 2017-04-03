@@ -1,5 +1,5 @@
 CPP=g++ -std=c++11
-CFLAGS=-I../opencv/build
+CFLAGS=-I../opencv/build -g -ggdb -O0
 LIBS=`pkg-config --libs opencv`
 
 all: test
