@@ -50,6 +50,9 @@ double calc_angle(Vec2<T> a, Vec2<T> b) {
     return atan2(y_diff, x_diff);
 };
 
+template <typename T>
+int sign(T val) {return val < 0;}
+
 // Returns indices of inflection points
 template <typename T>
 std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double threshold=10) {
@@ -57,15 +60,25 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     if (N < 3) {
         return std::vector<std::size_t>();
     }
-    double last_angle = calc_angle(points[0] - points[N-1], Vec2d(1,0));
+    double first_angle = calc_angle(points[0] - points[N-1], Vec2d(1,0));
+    double second_angle = calc_angle(points[1] - points[0], Vec2d(1,0));
+    int last_sign = sign(second_angle - first_angle);
+
+    double last_angle = second_angle;
     std::vector<std::size_t> inflections;
     for (std::size_t i = 0; i < N; ++i) {
+        printf("x: %f, y: %f\n", points[i].x, points[i].y);
         Vec2<T> new_vec = points[i] - points[i-1];
         // double angle = calc_angle(new_vec, last_vec);
         double raw_angle = calc_angle(new_vec, Vec2d(1,0));
         double angle_diff = raw_angle - last_angle;
-        printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
+        int this_sign = sign(angle_diff);
+        if (this_sign != last_sign) {
+            printf("Turning point at %f\n", points[i].x);
+        }
+        // printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
         last_angle = raw_angle;
+        last_sign = this_sign;
     }
     return inflections;
 };
