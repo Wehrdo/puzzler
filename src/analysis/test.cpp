@@ -1,8 +1,10 @@
 #include "edge_tools.hpp"
+#include "plot_points.hpp"
 #include <vector>
 #include <functional>
 #include <cmath>
 #include <cstdio>
+#include <opencv2/opencv.hpp>
 
 std::vector<Vec2d> gen_curve(int N, double start, double end, std::function<double(double)> func) {
     std::vector<Vec2d> points;
@@ -23,6 +25,11 @@ double polynomial(double x) {
 }
 int main(int argc, char* argv[]) {
     int N = 48;
-    auto points = gen_curve(N, -2, 2, polynomial);
-    auto inflection = find_inflections(points);
+    std::vector<Vec2d> points = gen_curve(N, -1, 1, polynomial);
+    //auto inflection = find_inflections(points);
+    cv::Mat img = plot_points(points, 480);
+
+    cv::namedWindow("Holy cow", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Holy cow", img);
+    cv::waitKey(0);
 };

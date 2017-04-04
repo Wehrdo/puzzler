@@ -1,3 +1,6 @@
+#ifndef EDGE_TOOLS_H
+#define EDGE_TOOLS_H
+
 #include <cstdint>
 #include <vector>
 #include <cmath>
@@ -82,3 +85,5 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     }
     return inflections;
 };
+
+#endif

@@ -1,11 +1,20 @@
 CPP=g++ -std=c++11
-CFLAGS=-I../opencv/build -g -ggdb -O0
+CPP_FILES := $(wildcard *.cpp)
+OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 LIBS=`pkg-config --libs opencv`
+CFLAGS=-I../opencv/build -g -ggdb -O0
 
-all: test
+all: dirs test
 
-test: test.cpp *.cpp *.hpp
-	$(CPP) $(CFLAGS) $(LIBS) -o $@ $<
+test: $(OBJ_FILES)
+	$(CPP) -o $@ $^ $(LIBS)
+
+obj/%.o: ./%.cpp
+	$(CPP) $(CFLAGS) -c -o $@ $<
+
+dirs:
+	mkdir -p obj
 
 clean: 
-	rm test;
+	rm -rf test;
+	rm -rf obj;
