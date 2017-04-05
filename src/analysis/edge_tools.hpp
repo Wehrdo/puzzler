@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <cstdio>
+#include <opencv2/opencv.hpp>
 
 template <typename T>
 class Vec2 {
@@ -78,6 +79,7 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
         int this_sign = sign(angle_diff);
         if (this_sign != last_sign) {
             printf("Turning point at %f\n", points[i].x);
+            inflections.push_back(i);
         }
         // printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
         last_angle = raw_angle;
@@ -85,5 +87,8 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     }
     return inflections;
 };
+
+
+cv::Mat draw_curve(std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections);
 
 #endif
