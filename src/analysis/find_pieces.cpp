@@ -108,9 +108,9 @@ std::vector<Piece> find_pieces( cv::Mat img )
 
          cv::approxPolyDP(contours[i], to_add.contour, 4, true );
          unsigned int j;
-         for( j = 0; j < contours[i].size(); j++ )
+         for( j = 0; j < to_add.contour.size(); j++ )
             {
-            to_add.points.push_back(Vec2d(to_add.contour[j].x,img.rows -  to_add.contour[j].y));
+            to_add.points.push_back(Vec2d(to_add.contour[j].x, img.rows -  to_add.contour[j].y));
             }
          pieces.push_back(to_add);
          }
