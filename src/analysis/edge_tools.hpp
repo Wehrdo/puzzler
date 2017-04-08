@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <opencv2/opencv.hpp>
 
+#define ANGLE_THRESHOLD ((M_PI / 180) * 10)
+
 template <typename T>
 class Vec2 {
 public:
@@ -24,7 +26,7 @@ public:
         sum.y = this->y + other.y;
         return sum;
     };
-    Vec2<T> operator-(const Vec2<T>& other) {
+    const Vec2<T> operator-(const Vec2<T>& other) const {
         Vec2<T> difference;
         difference.x = this->x - other.x;
         difference.y = this->y - other.y;
@@ -76,7 +78,7 @@ template <typename T>
 int sign(T val) {return val < 0;}
 
 // Returns indices of inflection points
-std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold=10);
+std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold=ANGLE_THRESHOLD);
 
 
 cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections);
