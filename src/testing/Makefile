@@ -11,7 +11,7 @@ points_test: points_test.cpp
 	$(CPP) $(CFLAGS) $(LIBS) -o $@ points_test.cpp
 
 display_image: display_image.cpp
-	$(CPP) $(CFLAGS) $(LIBS) -o $@ display_image.cpp
+	$(CPP) $(CFLAGS) display_image.cpp $(LIBS) -o $@
 
 hello_world: hello_world.o
 	$(CPP) -o hello hello_world.o
@@ -21,4 +21,4 @@ hello_world.o: hello_world.cpp
 
 clean:
 	rm hello;
-	rm DisplayImage
+	rm display_image
