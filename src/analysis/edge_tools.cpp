@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-cv::Mat draw_curve(std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections) {
+cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
     auto comp_y = [](Vec2d a, Vec2d b) {return a.y < b.y;};
     Vec2d max_x = *std::max_element(points.begin(), points.end(), comp_x);

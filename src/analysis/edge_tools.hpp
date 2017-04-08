@@ -90,6 +90,6 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
 };
 
 
-cv::Mat draw_curve(std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections);
+cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections);
 
 #endif

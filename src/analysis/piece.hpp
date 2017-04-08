@@ -1,7 +1,7 @@
 #ifndef PIECE_H
 #define PIECE_H
 
-#include "../analysis/edge_tools.hpp"
+#include "edge_tools.hpp"
 
 class Piece
    {

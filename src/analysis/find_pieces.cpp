@@ -12,7 +12,7 @@
 
 // Local includes
 #include "piece.hpp"
-#include "../analysis/edge_tools.hpp"
+#include "edge_tools.hpp"
 
 
 /**
@@ -45,7 +45,7 @@ std::vector<Piece> find_pieces( cv::Mat img )
    //  the flavors of the Teh-Chin chain approximation algorithm.
 
    // outline edges in points, store in vector
-   findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE );
+   findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
    int i;
    double average_size = 0.0;

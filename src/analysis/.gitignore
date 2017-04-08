@@ -1,3 +1,7 @@
 .vscode
 test
 obj/
+bin
+build
+test
+test_piece
