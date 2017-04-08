@@ -2,13 +2,15 @@
 #include <vector>
 #include <algorithm>
 
-cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections) {
+using namespace std;
+
+cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<Vec2d> inflections) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
     auto comp_y = [](Vec2d a, Vec2d b) {return a.y < b.y;};
-    Vec2d max_x = *std::max_element(points.begin(), points.end(), comp_x);
-    Vec2d max_y = *std::max_element(points.begin(), points.end(), comp_y);
-    Vec2d min_x = *std::min_element(points.begin(), points.end(), comp_x);
-    Vec2d min_y = *std::min_element(points.begin(), points.end(), comp_y);
+    Vec2d max_x = *max_element(points.begin(), points.end(), comp_x);
+    Vec2d max_y = *max_element(points.begin(), points.end(), comp_y);
+    Vec2d min_x = *min_element(points.begin(), points.end(), comp_x);
+    Vec2d min_y = *min_element(points.begin(), points.end(), comp_y);
     double scale = double(width) / (max_x.x - min_x.x);
     int height = ceil(scale * (max_y.y - min_y.y));
     // Function converts x,y values to pixel opencv point representing pixel location
@@ -37,44 +39,65 @@ cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2
     return out_img;
 }
 
-std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold) {
-    std::size_t N = points.size();
-    if (N < 3) {
-        return std::vector<std::size_t>();
-    }
-    double first_angle = calc_angle(Vec2d(1,0), points[0] - points[N-1]);
-    double second_angle = calc_angle(Vec2d(1,0), points[1] - points[0]);
-    printf("raw: %f\nraw: %f\n", first_angle, second_angle);
-    int last_sign = sign(second_angle - first_angle);
 
-    double last_angle = second_angle;
-    std::vector<std::size_t> inflections;
-    for (std::size_t i = 0; i < N; ++i) {
-        // printf("x: %f, y: %f\n", points[i].x, points[i].y);
-        Vec2d new_vec = points[i] - points[i-1];
-        // double angle = calc_angle(new_vec, last_vec);
-        double raw_angle = calc_angle(Vec2d(1,0), new_vec);
-        double angle_diff = raw_angle - last_angle;
-        int this_sign = sign(angle_diff);
-        if (this_sign != last_sign) {
-            printf("Turning point at %f\n", points[i].x);
-            inflections.push_back(i);
-        }
-        printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
-        last_angle = raw_angle;
-        last_sign = this_sign;
+vector<double> calc_curvature(const vector<Vec2d>& points) {
+    size_t N = points.size();
+    vector<Vec2d> der_1(points.size());
+    vector<Vec2d> der_2(points.size());
+    der_1[0] = points[0] - points[N-1];
+    for (size_t i = 1; i < N; ++i) {
+        der_1[i] = points[i] - points[i-1];
     }
-    return inflections;
+    der_2[0] = der_1[0] - der_1[N-1];
+    for (size_t i = 1; i < N; ++i) {
+        der_2[i] = der_1[i] - der_1[i-1];
+    }
+    vector<double> curvature(points.size());
+    for (size_t i = 0; i < N; ++i) {
+        Vec2d d1 = der_1[i];
+        Vec2d d2 = der_2[i];
+        double numerator = d1.x * d2.y - d1.y * d2.x;
+        double denom = pow(d1.x*d1.x + d1.y*d1.y, 1.5);
+        if (denom != 0) {
+            curvature[i] = numerator / denom;
+        } else {curvature[i] = 0;}
+    }
+    return curvature;
 }
 
-// std::vector<Vec2d> calc_curvature(const std::vector<Vec2d>& points) {
-//     std::vector<Vec2d> curve();
-//     std::vector<double> distances;
-//     curve.push_back((points[0] - points[N-1]).normalized());
-    
-//     for (std::size_t i = 1; i < points.size(); i++) {
-//         curve.push_back((points[i] - points[i-1]).normalized());
-//     }
-//     // Curve now contains vectors for all lines
+double sub_angle_ccw(double angle1, double angle2) {
+    if (angle1 < 0) {
+        angle1 += 2 * M_PI;
+    }
+    return angle1 - angle2;
+}
 
-// }
+vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
+    size_t N = points.size();
+    if (N < 3) {
+        return vector<size_t>();
+    }
+    auto curvatures = calc_curvature(points);
+    vector<size_t> infl_indices;
+
+    int last_sign = sign(curvatures[0]);
+    bool infl_valid = false;
+    double last_angle = calc_angle(Vec2d(1, 0), points[N-1] - points[0]);
+    for (size_t i = 1; i < curvatures.size(); ++i) {
+        int this_sign = sign(curvatures[i]);
+        double this_angle = calc_angle(Vec2d(1, 0), points[i] - points[i-1]);
+        double angle_diff = sub_angle_ccw(this_angle, last_angle);
+        if (abs(angle_diff) >= threshold) {
+            infl_valid = true;
+        }
+        if (this_sign != last_sign) {
+            last_sign = this_sign;
+            if (infl_valid) { // True inflection point
+                infl_indices.push_back(i);
+                last_angle = this_angle;
+                infl_valid = false;
+            }
+        }
+    }
+    return infl_indices;
+}
