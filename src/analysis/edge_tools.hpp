@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <opencv2/opencv.hpp>
 
-#define ANGLE_THRESHOLD ((M_PI / 180) * 10)
+#define ANGLE_THRESHOLD ((M_PI / 180) * 45)
 
 template <typename T>
 class Vec2 {

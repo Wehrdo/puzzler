@@ -67,13 +67,12 @@ void test_pieces(void)
    unsigned int j;
      for( j = 0; j < pieces.size(); j++ )
       {
-      //      int j = 1;
-      // infl_indices = find_inflections(pieces[j].points);
-      //      infl_points = std::vector<Vec2d>(infl_indices.size());
-      // for (int i = 0; i < infl_indices.size(); ++i)
-      //    {
-      //    infl_points[i] = pieces[j].points[infl_indices[i]];
-      //    }
+      infl_indices = find_inflections(pieces[j].points);
+      infl_points = std::vector<Vec2d>(infl_indices.size());
+      for (int i = 0; i < infl_indices.size(); ++i)
+         {
+         infl_points[i] = pieces[j].points[infl_indices[i]];
+         }
       cv::Mat output = draw_curve(pieces[j].points, 480, infl_points);
 
       std::string name = win_name + std::to_string(j);
@@ -113,7 +112,7 @@ void test_show_img(void)
 int main(int argc, char* argv[])
    {
 
-   test_show_img();
+   test_pieces();
 
    return 0;
 };

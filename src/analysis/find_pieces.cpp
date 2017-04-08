@@ -110,7 +110,7 @@ std::vector<Piece> find_pieces( cv::Mat img )
          unsigned int j;
          for( j = 0; j < contours[i].size(); j++ )
             {
-            to_add.points.push_back(Vec2d((contours[i])[j].x, (contours[i][j].y)));
+            to_add.points.push_back(Vec2d((contours[i])[j].x,img.rows -  (contours[i][j].y)));
             }
          pieces.push_back(to_add);
          }
