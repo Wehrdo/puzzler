@@ -4,7 +4,13 @@
 
 using namespace std;
 
-cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<Vec2d> inflections) {
+Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
+    int left_idx = idx == 0 ? points.size() - 1 : idx - 1;
+    int right_idx = (idx + 1) % points.size();
+    return points[left_idx] - points[right_idx];
+}
+
+cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, bool draw_tangents) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
     auto comp_y = [](Vec2d a, Vec2d b) {return a.y < b.y;};
     Vec2d max_x = *max_element(points.begin(), points.end(), comp_x);
@@ -31,9 +37,17 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<Vec2d> inflect
         last_pt = this_pt;
     }
 
-    for (Vec2d p : inflections) {
+    for (size_t idx : inflections) {
+        Vec2d p = points[idx];
         cv::Point infl_pt = convert_coord(p);
         cv::circle(out_img, infl_pt, 10, color);
+        if (draw_tangents) {
+            // Vec2d tangent = find_tangent_angle(idx, points);
+            // Vec2d scaled_tan = 10.0 * tangent.normalized();
+            // cv::Point2i tan_as_pt = cv::Point2i(scaled_tan.x, scaled_tan.y);
+            // cv::line(out_img, infl_pt, infl_pt + tan_as_pt, color);
+            // cv::line(out_img, infl_pt, infl_pt - tan_as_pt, color);
+        }
     }
 
     return out_img;
@@ -72,6 +86,10 @@ double sub_angle_ccw(double angle1, double angle2) {
     return angle1 - angle2;
 }
 
+double vec_angle_diff(Vec2d a, Vec2d b) {
+    return acos((a * b) / (a.norm() * b.norm()));
+}
+
 vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
     size_t N = points.size();
     if (N < 3) {
@@ -82,19 +100,19 @@ vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
 
     int last_sign = sign(curvatures[0]);
     bool infl_valid = false;
-    double last_angle = calc_angle(Vec2d(1, 0), points[N-1] - points[0]);
+    Vec2d last_vec = points[0] - points[N-1];
     for (size_t i = 1; i < curvatures.size(); ++i) {
         int this_sign = sign(curvatures[i]);
-        double this_angle = calc_angle(Vec2d(1, 0), points[i] - points[i-1]);
-        double angle_diff = sub_angle_ccw(this_angle, last_angle);
+        Vec2d this_vec = points[i] - points[i-1];
+        double angle_diff = vec_angle_diff(this_vec, last_vec);
         if (abs(angle_diff) >= threshold) {
             infl_valid = true;
         }
         if (this_sign != last_sign) {
             last_sign = this_sign;
             if (infl_valid) { // True inflection point
-                infl_indices.push_back(i);
-                last_angle = this_angle;
+                infl_indices.push_back(i - 1);
+                last_vec = this_vec;
                 infl_valid = false;
             }
             else {

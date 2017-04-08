@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <opencv2/opencv.hpp>
 
-#define ANGLE_THRESHOLD ((M_PI / 180) * 20)
+#define ANGLE_THRESHOLD ((M_PI / 180) * 40)
 
 template <typename T>
 class Vec2 {
@@ -81,6 +81,6 @@ int sign(T val) {return val < 0;}
 std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold=ANGLE_THRESHOLD);
 
 
-cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<Vec2d> inflections);
+cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, bool draw_tangents);
 
 #endif

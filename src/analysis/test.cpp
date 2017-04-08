@@ -37,12 +37,7 @@ void test_function(void)
     int N = 48;
     std::vector<Vec2d> points = gen_curve(N, -1.25, 1.4, polynomial);
     auto infl_indices = find_inflections(points);
-    std::vector<Vec2d> infl_points(infl_indices.size());
-    unsigned int i;
-    for (i = 0; i < infl_indices.size(); ++i) {
-        infl_points[i] = points[infl_indices[i]];
-    }
-    cv::Mat img = draw_curve(points, 480, infl_points);
+    cv::Mat img = draw_curve(points, 480, infl_indices, true);
     cv::namedWindow("AWESOME", cv::WINDOW_AUTOSIZE);
     cv::imshow("AWESOME", img);
     cv::waitKey(0);
@@ -70,12 +65,7 @@ void test_pieces(void)
       printf("Piece %d has %d points\n", j, pieces[j].points.size());
       fflush(stdout);
       infl_indices = find_inflections(pieces[j].points);
-      infl_points = std::vector<Vec2d>(infl_indices.size());
-      for (int i = 0; i < infl_indices.size(); ++i)
-         {
-         infl_points[i] = pieces[j].points[infl_indices[i]];
-         }
-      cv::Mat output = draw_curve(pieces[j].points, 480, infl_points);
+      cv::Mat output = draw_curve(pieces[j].points, 480, infl_indices, true);
 
       std::string name = win_name + std::to_string(j);
       cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
