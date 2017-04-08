@@ -1,5 +1,4 @@
 #include "edge_tools.hpp"
-#include "plot_points.hpp"
 #include <vector>
 #include <functional>
 #include <cmath>

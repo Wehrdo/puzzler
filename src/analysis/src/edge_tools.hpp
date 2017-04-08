@@ -66,12 +66,13 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
     }
     double first_angle = calc_angle(points[0] - points[N-1], Vec2d(1,0));
     double second_angle = calc_angle(points[1] - points[0], Vec2d(1,0));
+    printf("raw: %f\nraw: %f\n", first_angle, second_angle);
     int last_sign = sign(second_angle - first_angle);
 
     double last_angle = second_angle;
     std::vector<std::size_t> inflections;
     for (std::size_t i = 0; i < N; ++i) {
-        printf("x: %f, y: %f\n", points[i].x, points[i].y);
+        // printf("x: %f, y: %f\n", points[i].x, points[i].y);
         Vec2<T> new_vec = points[i] - points[i-1];
         // double angle = calc_angle(new_vec, last_vec);
         double raw_angle = calc_angle(new_vec, Vec2d(1,0));
@@ -81,7 +82,7 @@ std::vector<std::size_t> find_inflections(std::vector<Vec2<T> > points, double t
             printf("Turning point at %f\n", points[i].x);
             inflections.push_back(i);
         }
-        // printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
+        printf("raw: %f, diff: %f\n", raw_angle, angle_diff);
         last_angle = raw_angle;
         last_sign = this_sign;
     }

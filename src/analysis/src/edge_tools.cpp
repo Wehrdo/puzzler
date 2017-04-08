@@ -10,12 +10,14 @@ cv::Mat draw_curve(std::vector<Vec2d>& points, int width, std::vector<Vec2d> inf
     Vec2d min_x = *std::min_element(points.begin(), points.end(), comp_x);
     Vec2d min_y = *std::min_element(points.begin(), points.end(), comp_y);
     double scale = double(width) / (max_x.x - min_x.x);
+    int height = ceil(scale * (max_y.y - min_y.y));
     // Function converts x,y values to pixel opencv point representing pixel location
+    // Also takes into account that positive Y points downward in graphics
     auto convert_coord = [scale, min_x, min_y, max_x, max_y](Vec2d pt) {
                 return cv::Point((pt.x - min_x.x) * scale,
-                                                        (pt.y - min_y.y) * scale);};
+                                scale * (max_y.y - pt.y));};
     // Create image matrix with dimensions to fill width, and proportional height
-    cv::Mat out_img(ceil(scale * (max_y.y - min_y.y)), width, CV_8UC1);
+    cv::Mat out_img(height, width, CV_8UC1);
     cv::Scalar color = cv::Scalar(255, 255, 255);
 
 
