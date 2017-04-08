@@ -67,6 +67,8 @@ void test_pieces(void)
    unsigned int j;
      for( j = 0; j < pieces.size(); j++ )
       {
+      printf("Piece %d has %d points\n", j, pieces[j].points.size());
+      fflush(stdout);
       infl_indices = find_inflections(pieces[j].points);
       infl_points = std::vector<Vec2d>(infl_indices.size());
       for (int i = 0; i < infl_indices.size(); ++i)

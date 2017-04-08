@@ -97,6 +97,9 @@ vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
                 last_angle = this_angle;
                 infl_valid = false;
             }
+            else {
+                continue;
+            }
         }
     }
     return infl_indices;
