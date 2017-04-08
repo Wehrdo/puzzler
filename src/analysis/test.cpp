@@ -109,10 +109,17 @@ void test_show_img(void)
    cv::waitKey(0);
    }
 
+void test_cvx_hull( cv::Mat img )
+   {
+   std::vector<Piece> pieces = find_pieces( img );
+   pieces[0].process_cvx_hull();
+   }
+
 int main(int argc, char* argv[])
    {
+   cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
 
-   test_pieces();
+   test_cvx_hull(img);
 
    return 0;
 };

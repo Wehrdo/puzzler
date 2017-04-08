@@ -9,8 +9,13 @@
 class Piece
    {
    public:
+
+      // Member variables
       std::vector<Vec2d> points;
       std::vector<cv::Point> contour;
+      std::vector<int> cvx_hull_max_dist;
+
+      // Constructors
       Piece()
          {
 
@@ -21,7 +26,14 @@ class Piece
          this->points = points;
          }
 
+      // Member functions
+      void process_cvx_hull();
+
+      // TODO: Should make a getter function, would generate points in-place...
+
+
    };
+
 
 // Inflection point code here?
 
