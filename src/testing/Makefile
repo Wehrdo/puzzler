@@ -5,10 +5,10 @@ LIBS=`pkg-config --libs opencv`
 all: hello_world display_image points_test get_points
 
 get_points: get_points.cpp
-	$(CPP) $(CFLAGS) $(LIBS) -o $@ get_points.cpp
+	$(CPP) $(CFLAGS) get_points.cpp $(LIBS) -o $@
 
 points_test: points_test.cpp
-	$(CPP) $(CFLAGS) $(LIBS) -o $@ points_test.cpp
+	$(CPP) $(CFLAGS) points_test.cpp $(LIBS) -o $@
 
 display_image: display_image.cpp
 	$(CPP) $(CFLAGS) display_image.cpp $(LIBS) -o $@

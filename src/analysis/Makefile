@@ -6,7 +6,7 @@ CXX ?= g++
 # Extension of source files used in the project
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
-SRC_PATH = ./src
+SRC_PATH = .
 # Space-separated pkg-config libraries used by this project
 LIBS = opencv
 # General compiler flags
