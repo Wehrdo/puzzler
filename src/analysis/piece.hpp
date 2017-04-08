@@ -3,11 +3,14 @@
 
 #include "edge_tools.hpp"
 
+// to keep contours, can remove after testing
+#include "opencv2/imgproc/imgproc.hpp"
+
 class Piece
    {
    public:
       std::vector<Vec2d> points;
-
+      std::vector<cv::Point> contour;
       Piece()
          {
 

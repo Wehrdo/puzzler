@@ -31,17 +31,15 @@ double whatever_func(double x) {
     return sin(3*x);
 }
 
-int test_function(void)
+void test_function(void)
    {
-
-
-
 
     int N = 48;
     std::vector<Vec2d> points = gen_curve(N, -1.25, 1.4, polynomial);
     auto infl_indices = find_inflections(points);
     std::vector<Vec2d> infl_points(infl_indices.size());
-    for (int i = 0; i < infl_indices.size(); ++i) {
+    unsigned int i;
+    for (i = 0; i < infl_indices.size(); ++i) {
         infl_points[i] = points[infl_indices[i]];
     }
     cv::Mat img = draw_curve(points, 480, infl_points);
@@ -51,7 +49,7 @@ int test_function(void)
 
    }
 
-int test_pieces(void)
+void test_pieces(void)
    {
    std::vector<Piece> pieces;
 
@@ -66,7 +64,8 @@ int test_pieces(void)
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
    std::string win_name = "Window ";
-     for( int j = 0; j < pieces.size(); j++ )
+   unsigned int j;
+     for( j = 0; j < pieces.size(); j++ )
       {
       //      int j = 1;
       // infl_indices = find_inflections(pieces[j].points);
@@ -89,9 +88,32 @@ int test_pieces(void)
 
    }
 
+void test_show_img(void)
+   {
+   cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
+
+   std::vector<Piece> pieces = find_pieces( img );
+   cv::Mat output(img.size(), CV_8UC1, cv::Scalar(255,255,255) );
+
+   std::cout << "Found " << pieces.size() << " pieces." << std::endl;
+   std::cout << "Printing " << pieces[0].contour.size() << " points to screen." << std::endl;
+
+   cv::Scalar color( 200, 200, 200 );
+   cv::drawContours( output, std::vector<std::vector<cv::Point>>(1, pieces[0].contour), -1, color, CV_FILLED);
+
+
+   std::string test_win = "Test";
+   cv::namedWindow( test_win, CV_WINDOW_NORMAL );
+   cv::imshow( test_win, output );
+   cv::resizeWindow( test_win, 400, 800 );
+   cv::imwrite("../../images/out/median_filter.png", output );
+   cv::waitKey(0);
+   }
+
 int main(int argc, char* argv[])
    {
 
-   test_pieces();
+   test_show_img();
 
+   return 0;
 };

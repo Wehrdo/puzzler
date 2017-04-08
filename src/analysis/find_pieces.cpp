@@ -14,6 +14,34 @@
 #include "piece.hpp"
 #include "edge_tools.hpp"
 
+/**
+* MORPH_RECT == 0
+* MORPH_CROSS == 1
+* MORPH_ELLIPSE == 2
+*/
+void erode( int type, int size, cv::Mat img )
+{
+cv::Mat element = cv::getStructuringElement( type, cv::Size( 2*size + 1, 2*size+1 ), cv::Point( size, size ) );
+
+  /// Apply the erosion operation
+  cv::erode( img, img, element );
+
+}
+
+/**
+* MORPH_RECT == 0
+* MORPH_CROSS == 1
+* MORPH_ELLIPSE == 2
+*/
+void dilate( int type, int size, cv::Mat img )
+   {
+   cv::Mat element = cv::getStructuringElement( type, cv::Size( 2*size + 1, 2*size+1 ), cv::Point( size, size ) );
+
+  /// Apply the erosion operation
+  cv::dilate( img, img, element );
+}
+
+
 
 /**
 * Given an image with one or more pieces,
@@ -33,6 +61,12 @@ std::vector<Piece> find_pieces( cv::Mat img )
    cvtColor( img, img, CV_BGR2GRAY );
    img = img > 100;
 
+   // apply median filter
+   dilate(1, 5, img);
+   erode(1, 5, img );
+   cv::medianBlur(img, img, 25);
+
+
 
    // CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
    //  That is, any 2 subsequent points (x1,y1) and (x2,y2) of the contour
@@ -47,7 +81,7 @@ std::vector<Piece> find_pieces( cv::Mat img )
    // outline edges in points, store in vector
    findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
-   int i;
+   unsigned int i;
    double average_size = 0.0;
    double contour_area = 0.0;
 
@@ -70,12 +104,15 @@ std::vector<Piece> find_pieces( cv::Mat img )
       {
       if( contourArea(contours[i]) < (average_size*size_factor) )
          {
-         std::vector<Vec2d> points;
-         for( int j = 0; j < contours[i].size(); j++ )
+         Piece to_add;
+
+         cv::approxPolyDP(contours[i], to_add.contour, 4, true );
+         unsigned int j;
+         for( j = 0; j < contours[i].size(); j++ )
             {
-            points.push_back(Vec2d((contours[i])[j].x, (contours[i][j].y)));
+            to_add.points.push_back(Vec2d((contours[i])[j].x, (contours[i][j].y)));
             }
-         pieces.push_back(Piece(points));
+         pieces.push_back(to_add);
          }
       }
 
