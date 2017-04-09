@@ -64,7 +64,7 @@ void test_pieces(void)
       {
       Piece processing = pieces[i];
 
-      printf("Piece %d has %d points\n", i, processing.points.size());
+      printf("Piece %d has %lu points\n", i, processing.points.size());
       fflush(stdout);
 
       // find convex hull
