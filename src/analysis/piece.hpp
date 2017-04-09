@@ -13,7 +13,9 @@ class Piece
       // Member variables
       std::vector<Vec2d> points;
       std::vector<cv::Point> contour;
-      std::vector<int> cvx_hull_max_dist;
+      std::vector<int> hull_index;
+      std::vector<size_t> defect_index;
+      std::vector<size_t> inflection_index;
 
       // Constructors
       Piece()
@@ -29,8 +31,8 @@ class Piece
       // Member functions
       void process_cvx_hull();
 
-      // TODO: Should make a getter function, would generate points in-place...
-
+      //TODO: Move inflection point calc here
+      //TODO: Move draw function here
 
    };
 

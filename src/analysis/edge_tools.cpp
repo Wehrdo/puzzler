@@ -10,7 +10,7 @@ Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
     return points[left_idx] - points[right_idx];
 }
 
-cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, bool draw_tangents) {
+cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, vector<size_t> defects, bool draw_tangents) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
     auto comp_y = [](Vec2d a, Vec2d b) {return a.y < b.y;};
     Vec2d max_x = *max_element(points.begin(), points.end(), comp_x);
@@ -36,6 +36,14 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
         cv::line(out_img, last_pt, this_pt, color);
         last_pt = this_pt;
     }
+
+    for( size_t idx : defects )
+       {
+       Vec2d p = points[idx];
+       cv::Point defect_pt = convert_coord(p);
+       cv::circle(out_img, defect_pt, 5, color);
+       }
+
 
     for (size_t idx : inflections) {
         Vec2d p = points[idx];
