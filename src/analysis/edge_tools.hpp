@@ -68,18 +68,26 @@ Vec2<T> Vec2<T>::normalized() {
     return output;
 }
 
-// v1 and v2 are the directions of the two lines
-// o1 and o2 are points that exist on line 1 and line 2, respectively
-// (Can also consider it as the origin of v1 and v2)
-// Will return INFINITY, INFINITY if lines don't intersect
+/* v1 and v2 are the directions of the two lines
+ * o1 and o2 are points that exist on line 1 and line 2, respectively
+ * (Can also consider it as the origin of v1 and v2)
+ * Populates intersection_pt with the intersection.
+ * Returns false if lines don't intersect, true otherwise
+ */
 template <typename T>
 bool intersect_lines(Vec2<T> v1, Vec2<T> v2, Vec2<T> o1, Vec2<T> o2, Vec2<T>& intersection_pt) {
+    /* Parametric equation of a line
+    p1 = o1 + v1 * u
+    p2 = o2 + v2 * v
+    Set p1 == p2, and solve for either u or v.
+    Then put the solution into one of the line equations, and the result
+    is the intersection
+    */
     T denom = (v2.x * v1.y - v2.y * v1.x);
     if (denom != 0) {
         Vec2<T> o_diff = o2 - o1;
         T numerator = (o_diff.y * v2.x - o_diff.x * v2.y);
         T u = numerator / denom;
-        // Point can be calculated from one of the lines
         intersection_pt = u * v1 + o1;
         return true;
     } else {
