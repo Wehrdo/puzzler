@@ -42,11 +42,11 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
         cv::Point infl_pt = convert_coord(p);
         cv::circle(out_img, infl_pt, 10, color);
         if (draw_tangents) {
-            // Vec2d tangent = find_tangent_angle(idx, points);
-            // Vec2d scaled_tan = 10.0 * tangent.normalized();
-            // cv::Point2i tan_as_pt = cv::Point2i(scaled_tan.x, scaled_tan.y);
-            // cv::line(out_img, infl_pt, infl_pt + tan_as_pt, color);
-            // cv::line(out_img, infl_pt, infl_pt - tan_as_pt, color);
+            Vec2d tangent = find_tangent_angle(idx, points);
+            Vec2d scaled_tan = tangent.normalized() * 40;
+            cv::Point2i tan_as_pt = cv::Point2i(scaled_tan.x, -scaled_tan.y);
+            cv::line(out_img, infl_pt, infl_pt + tan_as_pt, color);
+            cv::line(out_img, infl_pt, infl_pt - tan_as_pt, color);
         }
     }
 
