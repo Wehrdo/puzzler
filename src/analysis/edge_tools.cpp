@@ -41,15 +41,26 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
         Vec2d p = points[idx];
         cv::Point infl_pt = convert_coord(p);
         cv::circle(out_img, infl_pt, 10, color);
+        cv::putText(out_img, to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, color);
         if (draw_tangents) {
             Vec2d tangent = find_tangent_angle(idx, points);
-            Vec2d scaled_tan = tangent.normalized() * 40;
+            Vec2d scaled_tan = 40.0 * tangent.normalized();
             cv::Point2i tan_as_pt = cv::Point2i(scaled_tan.x, -scaled_tan.y);
             cv::line(out_img, infl_pt, infl_pt + tan_as_pt, color);
             cv::line(out_img, infl_pt, infl_pt - tan_as_pt, color);
         }
     }
 
+    // Just for testing
+    
+    Vec2d first_tan = find_tangent_angle(inflections[0], points);
+    Vec2d last_tan = find_tangent_angle(inflections[inflections.size() - 1], points);
+    Vec2d first_point = points[inflections[0]];
+    Vec2d last_point = points[inflections[inflections.size() - 1]];
+    Vec2d intersection_pt;
+    bool intersect = intersect_lines(first_tan, last_tan, first_point, last_point, intersection_pt);
+    if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 5, color, 5);}
+    
     return out_img;
 }
 
@@ -77,13 +88,6 @@ vector<double> calc_curvature(const vector<Vec2d>& points) {
         } else {curvature[i] = 0;}
     }
     return curvature;
-}
-
-double sub_angle_ccw(double angle1, double angle2) {
-    if (angle1 < 0) {
-        angle1 += 2 * M_PI;
-    }
-    return angle1 - angle2;
 }
 
 double vec_angle_diff(Vec2d a, Vec2d b) {

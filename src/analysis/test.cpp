@@ -62,7 +62,7 @@ void test_pieces(void)
    unsigned int j;
      for( j = 0; j < pieces.size(); j++ )
       {
-      printf("Piece %d has %d points\n", j, pieces[j].points.size());
+      printf("Piece %d has %lu points\n", j, pieces[j].points.size());
       fflush(stdout);
       infl_indices = find_inflections(pieces[j].points);
       cv::Mat output = draw_curve(pieces[j].points, 480, infl_indices, true);
@@ -101,7 +101,7 @@ void test_show_img(void)
    cv::waitKey(0);
    }
 
-int main(int argc, char* argv[])
+int main()
    {
 
    test_pieces();
