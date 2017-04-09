@@ -37,7 +37,7 @@ public:
         return (this->x * other.x) + (this->y * other.y);
     };
     // Scalar multiply
-    T operator*(const T factor) {
+    Vec2<T> operator*(const T factor) {
         return Vec2<T>(this->x * factor, this->y * factor);
     }
     // Scalar divide
@@ -59,8 +59,8 @@ template <typename T>
 Vec2<T> Vec2<T>::normalized() {
     Vec2<T> output;
     T norm_val = this->norm();
-    output.x /= norm_val;
-    output.y /= norm_val;
+    output.x = this->x / norm_val;
+    output.y = this->y / norm_val;
     return output;
 }
 
