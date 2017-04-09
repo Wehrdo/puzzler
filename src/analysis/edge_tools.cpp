@@ -25,15 +25,18 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
                 return cv::Point((pt.x - min_x.x) * scale,
                                 scale * (max_y.y - pt.y));};
     // Create image matrix with dimensions to fill width, and proportional height
-    cv::Mat out_img(height, width, CV_8UC1, cv::Scalar(0));
-    cv::Scalar color = cv::Scalar(255, 255, 255);
+    cv::Mat out_img(height, width, CV_8UC3, cv::Scalar(0));
+    cv::Scalar white = cv::Scalar(255, 255, 255);
+    cv::Scalar red = cv::Scalar(0, 0, 255);
+    cv::Scalar blue = cv::Scalar(255, 80, 80);
+    cv::Scalar green = cv::Scalar(0, 255, 0);
 
 
     Vec2d last_vec = points[points.size() - 1];
     cv::Point last_pt = convert_coord(last_vec);
     for (Vec2d p : points) {
         cv::Point this_pt = convert_coord(p);
-        cv::line(out_img, last_pt, this_pt, color);
+        cv::line(out_img, last_pt, this_pt, white);
         last_pt = this_pt;
     }
 
@@ -41,21 +44,20 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
        {
        Vec2d p = points[idx];
        cv::Point defect_pt = convert_coord(p);
-       cv::circle(out_img, defect_pt, 5, color);
+       cv::circle(out_img, defect_pt, 5, green);
        }
-
 
     for (size_t idx : inflections) {
         Vec2d p = points[idx];
         cv::Point infl_pt = convert_coord(p);
-        cv::circle(out_img, infl_pt, 10, color);
-        cv::putText(out_img, to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, color);
+        cv::circle(out_img, infl_pt, 10, white);
+        cv::putText(out_img, to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, white);
         if (draw_tangents) {
             Vec2d tangent = find_tangent_angle(idx, points);
             Vec2d scaled_tan = 40.0 * tangent.normalized();
             cv::Point2i tan_as_pt = cv::Point2i(scaled_tan.x, -scaled_tan.y);
-            cv::line(out_img, infl_pt, infl_pt + tan_as_pt, color);
-            cv::line(out_img, infl_pt, infl_pt - tan_as_pt, color);
+            cv::line(out_img, infl_pt, infl_pt + tan_as_pt, red);
+            cv::line(out_img, infl_pt, infl_pt - tan_as_pt, red);
         }
     }
 
@@ -67,7 +69,7 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
     Vec2d last_point = points[inflections[inflections.size() - 1]];
     Vec2d intersection_pt;
     bool intersect = intersect_lines(first_tan, last_tan, first_point, last_point, intersection_pt);
-    if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 5, color, 5);}
+    if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 10, blue);}
     
     return out_img;
 }
