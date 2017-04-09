@@ -9,8 +9,15 @@
 class Piece
    {
    public:
+
+      // Member variables
       std::vector<Vec2d> points;
       std::vector<cv::Point> contour;
+      std::vector<int> hull_index;
+      std::vector<size_t> defect_index;
+      std::vector<size_t> inflection_index;
+
+      // Constructors
       Piece()
          {
 
@@ -21,7 +28,14 @@ class Piece
          this->points = points;
          }
 
+      // Member functions
+      void process_cvx_hull();
+
+      //TODO: Move inflection point calc here
+      //TODO: Move draw function here
+
    };
+
 
 // Inflection point code here?
 

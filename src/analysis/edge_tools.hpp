@@ -112,6 +112,6 @@ int sign(T val) {return val < 0;}
 std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold=ANGLE_THRESHOLD);
 
 
-cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, bool draw_tangents);
+cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, std::vector<size_t> defects, bool draw_tangents);
 
 #endif
