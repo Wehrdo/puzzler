@@ -8,7 +8,7 @@
 
 void Piece::process_cvx_hull()
    {
-
+   float threshold = 10.0;
    /* ConvexityDefects
    *
    * start_index
@@ -24,6 +24,7 @@ void Piece::process_cvx_hull()
    unsigned int i;
    for( i = 0; i < defects.size(); i++ )
       {
-      defect_index.push_back(defects[i][2]);
+      if( defects[i][3]/256.0 > threshold )
+         defect_index.push_back(defects[i][2]);
       }
    }
