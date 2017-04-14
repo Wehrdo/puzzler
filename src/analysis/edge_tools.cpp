@@ -4,6 +4,23 @@
 
 using namespace std;
 
+int next_index( std::vector<T> vector, int index )
+   {
+   if( index == vector.size()-1 )
+      return 0;
+
+   return index++;
+   }
+
+int prev_index( std::vector<T> vector, int index )
+   {
+   if( index == 0 )
+      return 0;
+
+   return index--;
+
+   }
+
 Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
     int left_idx = idx == 0 ? points.size() - 1 : idx - 1;
     int right_idx = (idx + 1) % points.size();
@@ -62,7 +79,7 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
     }
 
     // Just for testing
-    
+
     Vec2d first_tan = find_tangent_angle(inflections[0], points);
     Vec2d last_tan = find_tangent_angle(inflections[inflections.size() - 1], points);
     Vec2d first_point = points[inflections[0]];
@@ -70,7 +87,7 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
     Vec2d intersection_pt;
     bool intersect = intersect_lines(first_tan, last_tan, first_point, last_point, intersection_pt);
     if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 10, blue);}
-    
+
     return out_img;
 }
 

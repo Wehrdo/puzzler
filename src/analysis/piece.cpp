@@ -31,12 +31,21 @@ void Piece::process_cvx_hull()
 
 void Piece::find_indents( void )
    {
-   for( unsigned int i; i < hull_index.size()-1; i++ )
+   for( unsigned int defect : defect_index )
       {
-      int prev_hull = hull_index[i];
-      int next_hull = hull_index[i+1];
+      int inf_idx = 0;
 
-      //inflection_index.find( inflection_index.begin(), inflection_index.end(),
+      // Iterate until find inflection just past maxima
+      while( inflection_index[inf_idx] < defect )
+         {
+         inf_idx = next_index( inflection_index, inf_idx );
+         }
+
+      // Find inflection points before and after maxima
+      unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx )];
+      unsigned int nxt_inf = inflection_index[inf_idx];
+
+      // Calculate tanget lines from inflection points
+
 
       }
-   }
