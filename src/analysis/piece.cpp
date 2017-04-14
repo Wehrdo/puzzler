@@ -28,3 +28,15 @@ void Piece::process_cvx_hull()
          defect_index.push_back(defects[i][2]);
       }
    }
+
+void Piece::find_indents( void )
+   {
+   for( unsigned int i; i < hull_index.size()-1; i++ )
+      {
+      int prev_hull = hull_index[i];
+      int next_hull = hull_index[i+1];
+
+      //inflection_index.find( inflection_index.begin(), inflection_index.end(),
+
+      }
+   }

@@ -2,6 +2,7 @@
 #define PIECE_H
 
 #include "edge_tools.hpp"
+#include "curve.hpp"
 
 // to keep contours, can remove after testing
 #include "opencv2/imgproc/imgproc.hpp"
@@ -16,6 +17,7 @@ class Piece
       std::vector<int> hull_index;
       std::vector<size_t> defect_index;
       std::vector<size_t> inflection_index;
+      std::vector<Curve> curves;
 
       // Constructors
       Piece()
@@ -33,6 +35,8 @@ class Piece
 
       //TODO: Move inflection point calc here
       //TODO: Move draw function here
+
+      void find_indents( void );
 
    };
 
