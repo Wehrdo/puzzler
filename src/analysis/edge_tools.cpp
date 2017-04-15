@@ -4,13 +4,28 @@
 
 using namespace std;
 
+
+/*
+ * Returns a wrapped index, e.g. index 42 of an array with 40 elements is 2
+ * Index -1 of an array with 40 elements is 39
+*/
+int norm_idx(size_t n, size_t i) {
+    ssize_t wrapped_i = i % n;
+    if (wrapped_i < 0) {
+        return wrapped_i + n;
+    } else {
+        return wrapped_i;
+    }
+}
+
 Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
     int left_idx = idx == 0 ? points.size() - 1 : idx - 1;
-    int right_idx = (idx + 1) % points.size();
+    int right_idx = norm_idx(points.size(), idx + 1);
     return points[left_idx] - points[right_idx];
 }
 
-cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, vector<size_t> defects, bool draw_tangents) {
+cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, vector<size_t> defects,
+                    std::vector<std::pair<size_t, size_t>> straight_edges, bool draw_tangents) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
     auto comp_y = [](Vec2d a, Vec2d b) {return a.y < b.y;};
     Vec2d max_x = *max_element(points.begin(), points.end(), comp_x);
@@ -30,6 +45,7 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
     cv::Scalar red = cv::Scalar(0, 0, 255);
     cv::Scalar blue = cv::Scalar(255, 80, 80);
     cv::Scalar green = cv::Scalar(0, 255, 0);
+    cv::Scalar orange = cv::Scalar(0, 165, 255);
 
 
     Vec2d last_vec = points[points.size() - 1];
@@ -59,6 +75,12 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
             cv::line(out_img, infl_pt, infl_pt + tan_as_pt, red);
             cv::line(out_img, infl_pt, infl_pt - tan_as_pt, red);
         }
+    }
+
+    for (auto edge : straight_edges) {
+        Vec2d start_pt = points[edge.first];
+        Vec2d end_pt = points[edge.second];
+        cv::line(out_img, convert_coord(start_pt), convert_coord(end_pt), orange, 5);
     }
 
     // Just for testing
@@ -104,7 +126,7 @@ double vec_angle_diff(Vec2d a, Vec2d b) {
     return acos((a * b) / (a.norm() * b.norm()));
 }
 
-vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
+vector<size_t> find_inflections(const std::vector<Vec2d>& points, double threshold) {
     size_t N = points.size();
     if (N < 3) {
         return vector<size_t>();
@@ -135,4 +157,34 @@ vector<size_t> find_inflections(vector<Vec2d > points, double threshold) {
         }
     }
     return infl_indices;
+}
+
+
+/* Returns pairs representing straight sides
+ * Pair endpoints are inclusive
+*/
+vector<pair<size_t, size_t>> find_straight_sides(const vector<Vec2d>& points, double ang_threshold) {
+    printf("Thresh: %f\n", ang_threshold);
+    auto curvatures = calc_curvature(points);
+    auto within_range_lambda = [ang_threshold](double curvature) {
+        return (fabs(curvature) < ang_threshold);};
+    function<bool(double)> within_range = within_range_lambda;
+    // Find all runs which have low curvature
+    auto all_straight_edges = find_runs(curvatures, within_range);
+    vector<pair<size_t, size_t>> final_edges;
+    for (auto raw_edge : all_straight_edges) {
+        // printf("%d - %d\n", raw_edge.first, raw_edge.second);
+        // Check that both ends curve inwards
+        bool curves_in = curvatures[raw_edge.first] > 0 && curvatures[raw_edge.second] > 0;
+        if (raw_edge.second - raw_edge.first >= 0.0 * points.size() && curves_in) {
+            final_edges.push_back(pair<size_t, size_t>(
+                raw_edge.first,
+                norm_idx(points.size(), raw_edge.second - 1) // inclusive endpiont
+            ));
+        }
+    }
+    // for (auto c : curvatures) {
+    //     printf("%f\n", c);
+    // }
+    return final_edges;
 }

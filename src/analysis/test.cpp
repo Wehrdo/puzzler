@@ -37,10 +37,10 @@ void test_function(void)
     int N = 48;
     std::vector<Vec2d> points = gen_curve(N, -1.25, 1.4, polynomial);
     auto infl_indices = find_inflections(points);
-    cv::Mat img = draw_curve(points, 480, infl_indices, std::vector<size_t>(), true);
-    cv::namedWindow("AWESOME", cv::WINDOW_AUTOSIZE);
-    cv::imshow("AWESOME", img);
-    cv::waitKey(0);
+    // cv::Mat img = draw_curve(points, 480, infl_indices, std::vector<size_t>(), true);
+    // cv::namedWindow("AWESOME", cv::WINDOW_AUTOSIZE);
+    // cv::imshow("AWESOME", img);
+    // cv::waitKey(0);
 
    }
 
@@ -74,8 +74,11 @@ void test_pieces(void)
       infl_indices = find_inflections(processing.points);
       std::cout << "Piece " << i << " has " << infl_indices.size() << " inflection points." << std::endl;
 
+      auto straight_lines = find_straight_sides(processing.points, ((M_PI / 180) * 0.5));
+
       // draw to matrix
-      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, true);
+      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, straight_lines, true);
+
 
       // Show to screen
       std::string name = win_name + std::to_string(i);
@@ -93,6 +96,6 @@ int main()
    cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
 
    test_pieces();
-
+   
    return 0;
 };
