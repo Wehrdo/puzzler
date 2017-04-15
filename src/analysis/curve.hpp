@@ -1,20 +1,23 @@
 #ifndef CURVE_H
 #define CURVE_H
 
-enum curve_type
-{
-   indent,
-   outdent,
-   END,
-};
 
 class Curve
    {
    public:
+      enum curve_type
+      {
+         indent,
+         outdent,
+         END,
+      };
+
       cv::Point origin;
       int start;
       int end;
       curve_type type;
+
+
 
       Curve( int start, int end, cv::Point origin, curve_type type )
          {

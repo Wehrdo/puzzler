@@ -88,8 +88,9 @@ bool intersect_lines(cv::Point v1, cv::Point v2, cv::Point o1, cv::Point o2, cv:
 
 void Piece::find_indents( void )
    {
-   for( unsigned int defect : defect_index )
+   for( unsigned int dft_idx = 0; dft_idx < defect_index.size(); dft_idx++ )
       {
+      unsigned int defect = defect_index[dft_idx];
       std::cout << " looking at defect " << defect << std::endl;
       unsigned int inf_idx = 0;
       bool wrapped = false;
@@ -128,8 +129,78 @@ void Piece::find_indents( void )
          // Found a curve
          std::cout << "Found a true curve!" << std::endl;
 
+         // Find the center of indent
+         cv::RotatedRect best_fit = fitEllipse(
+            std::vector<cv::Point>( &(contour[prv_inf]), &(contour[nxt_inf]) ) );
 
+         bool tmp;
 
+         Curve to_add( prev_index( defect_index, dft_idx, tmp ), next_index( defect_index, dft_idx, tmp ),  cv::Point(best_fit.center), Curve::indent );
+         curves.push_back( to_add );
          }
       }
+   }
+
+void Piece::draw( unsigned int width )
+   {
+   std::string name = "Piece info";
+   cv::namedWindow( name );
+
+   auto comp_x = [](cv::Point a, cv::Point b) {return a.x < b.x;};
+   auto comp_y = [](cv::Point a, cv::Point b) {return a.y < b.y;};
+
+   cv::Point max_x = *max_element(contour.begin(), contour.end(), comp_x );
+   cv::Point max_y = *max_element(contour.begin(), contour.end(), comp_y );
+   cv::Point min_x = *min_element(contour.begin(), contour.end(), comp_x );
+   cv::Point min_y = *min_element(contour.begin(), contour.end(), comp_y );
+
+   double scale = double( width) / (max_x.x - min_x.x);
+   unsigned int height = ceil( scale * (max_y.y - min_y.y) );
+
+   // Function converts x,y values to pixel opencv point representing pixel location
+   // Also takes into account that positive Y points downward in graphics
+   auto convert_coord = [scale, min_x, min_y, max_x, max_y](cv::Point pt)
+      {
+         return cv::Point((pt.x - min_x.x) * scale,
+                          scale * (max_y.y - pt.y));};
+
+   // Create image matrix with dimensions to fill width, and proportional height
+   cv::Mat out_img(height, width, CV_8UC3, cv::Scalar(0));
+   cv::Scalar white = cv::Scalar(255, 255, 255);
+   cv::Scalar red = cv::Scalar(0, 0, 255);
+   cv::Scalar blue = cv::Scalar(255, 80, 80);
+   cv::Scalar green = cv::Scalar(0, 255, 0);
+
+   // Draw the piece to matrix
+   cv::Point last_pt = convert_coord( contour[contour.size() -1] );
+   for( cv::Point p : contour)
+      {
+      cv::Point this_pt = convert_coord( p );
+      cv::line( out_img, last_pt, this_pt, white );
+      last_pt = this_pt;
+      }
+
+   // Draw the defects
+   for( size_t idx : defect_index )
+      {
+      cv::Point pt = convert_coord( contour[idx] );
+      cv::circle(out_img, pt, 5, green );
+      }
+
+   for( size_t idx : inflection_index )
+      {
+      cv::Point infl_pt = convert_coord( contour[idx] );
+      cv::circle(out_img, infl_pt, 10, white);
+      cv::putText( out_img, std::to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, white );
+
+      }
+
+   for( Curve curve : curves )
+      {
+      cv::Point centre = convert_coord( curve.origin );
+      cv::circle(out_img, centre, 20, blue );
+      }
+
+   cv::imshow( name, out_img );
+
    }

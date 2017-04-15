@@ -37,7 +37,7 @@ class Piece
       //TODO: Move draw function here
 
       void find_indents( void );
-
+      void draw( unsigned int width );
    };
 
 

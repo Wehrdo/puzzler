@@ -75,16 +75,18 @@ void test_pieces(void)
       std::cout << "Piece " << i << " has " << infl_indices.size() << " inflection points." << std::endl;
       processing.inflection_index = infl_indices;
       // draw to matrix
-      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, true);
+      //      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, true);
 
       // Show to screen
-      std::string name = win_name + std::to_string(i);
-      cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
-      cv::imshow(name, output);
-      cv::waitKey(0);
-      cv::destroyWindow(name );
+      // std::string name = win_name + std::to_string(i);
+      // cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+      // cv::imshow(name, output);
+      // cv::waitKey(0);
+      // cv::destroyWindow(name );@
 
       processing.find_indents();
+      processing.draw( 480 );
+      cv::waitKey(0);
       }
    }
 
