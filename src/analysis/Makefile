@@ -138,19 +138,6 @@ ifeq ($(shell git describe > /dev/null 2>&1 ; echo $$?), 0)
 		-D VERSION_HASH=\"$(VERSION_HASH)\"
 endif
 
-# Standard, non-optimized release build
-.PHONY: release
-release: dirs
-ifeq ($(USE_VERSION), true)
-	@echo "Beginning release build v$(VERSION_STRING)"
-else
-	@echo "Beginning release build"
-endif
-	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
-	@echo -n "Total build time: "
-	@$(END_TIME)
-
 # Debug build for gdb debugging
 .PHONY: debug
 debug: dirs
@@ -158,6 +145,19 @@ ifeq ($(USE_VERSION), true)
 	@echo "Beginning debug build v$(VERSION_STRING)"
 else
 	@echo "Beginning debug build"
+endif
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Standard, non-optimized release build
+.PHONY: release
+release: dirs
+ifeq ($(USE_VERSION), true)
+	@echo "Beginning release build v$(VERSION_STRING)"
+else
+	@echo "Beginning release build"
 endif
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory
