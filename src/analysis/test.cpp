@@ -85,6 +85,7 @@ void test_pieces(void)
       // cv::destroyWindow(name );@
 
       processing.find_indents();
+      processing.find_outdents();
       processing.draw( 480 );
       cv::waitKey(0);
       }

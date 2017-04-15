@@ -135,7 +135,70 @@ void Piece::find_indents( void )
 
          bool tmp;
 
-         Curve to_add( prev_index( defect_index, dft_idx, tmp ), next_index( defect_index, dft_idx, tmp ),  cv::Point(best_fit.center), Curve::indent );
+         Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::indent );
+         curves.push_back( to_add );
+         }
+      }
+   }
+
+void Piece::find_outdents( void )
+   {
+   for( unsigned int hull_idx = 0; hull_idx < hull_index.size(); hull_idx++ )
+      {
+      unsigned int hull = hull_index[hull_idx];
+      std::cout << " looking at hull " << hull << std::endl;
+      unsigned int inf_idx = 0;
+      bool wrapped = false;
+
+      // Iterate until find inflection just past maxima
+      while( inflection_index[inf_idx] < hull && !wrapped )
+         {
+         inf_idx = next_index( inflection_index, inf_idx, wrapped );
+         }
+
+
+      // Find inflection points before and after maxima
+      unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
+      unsigned int nxt_inf = inflection_index[inf_idx];
+
+      std::cout << "found inflection points " << prv_inf << " and " << nxt_inf << std::endl;
+
+      // Calculate tanget lines from inflection points
+
+      cv::Point prv_slp, nxt_slp, prv, nxt, ins_pt;
+      prv_slp = find_tangent_angle( prv_inf, contour );
+      nxt_slp = find_tangent_angle( nxt_inf, contour );
+
+      std::cout << "found the tangent angles: " << prv_slp << ", " << nxt_slp << std::endl;
+
+      prv = contour[prv_inf];
+      nxt = contour[nxt_inf];
+
+      bool intersect = intersect_lines( prv_slp, nxt_slp, prv, nxt, ins_pt );
+
+      std::cout << "The lines do " << (!intersect ? "not ":"") << "intersect" << std::endl;
+
+      int within = pointPolygonTest( contour, ins_pt, false );
+      if( intersect && ( within > 0 ) )
+         {
+         // Found a curve
+         std::cout << "Found a true curve!" << std::endl;
+
+         std::vector<cv::Point> curve;
+         unsigned int start = prv_inf;
+         bool wrapped = false;
+         while( start <= nxt_inf && !wrapped )
+            {
+            curve.push_back( contour[start] );
+            start = next_index( contour, start, wrapped );
+            }
+
+         // Find the center of indent
+         cv::RotatedRect best_fit = fitEllipse( curve );
+
+         bool tmp;
+
+         Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::outdent );
          curves.push_back( to_add );
          }
       }
@@ -198,7 +261,13 @@ void Piece::draw( unsigned int width )
    for( Curve curve : curves )
       {
       cv::Point centre = convert_coord( curve.origin );
-      cv::circle(out_img, centre, 20, blue );
+      cv::Scalar color;
+      if( curve.type == Curve::indent )
+         color = blue;
+      else
+         color = red;
+
+      cv::circle(out_img, centre, 20, color );
       }
 
    cv::imshow( name, out_img );
