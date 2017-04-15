@@ -4,23 +4,6 @@
 
 using namespace std;
 
-int next_index( std::vector<T> vector, int index )
-   {
-   if( index == vector.size()-1 )
-      return 0;
-
-   return index++;
-   }
-
-int prev_index( std::vector<T> vector, int index )
-   {
-   if( index == 0 )
-      return 0;
-
-   return index--;
-
-   }
-
 Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
     int left_idx = idx == 0 ? points.size() - 1 : idx - 1;
     int right_idx = (idx + 1) % points.size();

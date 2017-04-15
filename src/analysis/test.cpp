@@ -73,7 +73,7 @@ void test_pieces(void)
 
       infl_indices = find_inflections(processing.points);
       std::cout << "Piece " << i << " has " << infl_indices.size() << " inflection points." << std::endl;
-
+      processing.inflection_index = infl_indices;
       // draw to matrix
       cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, true);
 
@@ -83,6 +83,8 @@ void test_pieces(void)
       cv::imshow(name, output);
       cv::waitKey(0);
       cv::destroyWindow(name );
+
+      processing.find_indents();
       }
    }
 
