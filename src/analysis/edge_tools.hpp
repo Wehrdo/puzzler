@@ -127,8 +127,8 @@ cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size
     Note that if all elements pass, this will return one pair with the first and last elements the same
  */
 template <typename T>
-std::vector<std::pair<size_t, size_t>> find_runs(const std::vector<T> &vals, std::function<bool(const T)> test_func) {
-    auto pairs = std::vector<std::pair<size_t, size_t>>();
+std::vector<std::pair<int, int>> find_runs(const std::vector<T> &vals, std::function<bool(const T)> test_func) {
+    auto pairs = std::vector<std::pair<int, int>>();
     if (vals.size() < 1) {return pairs;} // Empty return for empty input
     bool within_run = false; // This is unknown at first, will correct at end
     for (size_t i = 0; i < vals.size(); ++i) {
@@ -136,7 +136,7 @@ std::vector<std::pair<size_t, size_t>> find_runs(const std::vector<T> &vals, std
         // Starting new run
         if (item_valid && !within_run) {
             // Create new pair starting here
-            pairs.push_back(std::pair<size_t, size_t>(i, -1));
+            pairs.push_back(std::pair<int, int>(i, -1));
             within_run = true;
         }
         // Ending run
@@ -147,7 +147,9 @@ std::vector<std::pair<size_t, size_t>> find_runs(const std::vector<T> &vals, std
         }
     }
     // If first and last runs are the same run
-    if (test_func(vals[0]) && test_func(vals[vals.size() - 1])) {
+    if (test_func(vals[0]) && test_func(vals[vals.size() - 1]) &&
+            pairs[pairs.size() - 1].second == -1) // Last run never finished
+        {
         size_t true_start = pairs[pairs.size() - 1].first;
         pairs[0].first = true_start;
         // Remove the incomplete pair that was just joined
