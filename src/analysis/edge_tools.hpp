@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <functional>
 #include <cmath>
 #include <cstdio>
 #include <opencv2/opencv.hpp>
@@ -109,9 +110,54 @@ template <typename T>
 int sign(T val) {return val < 0;}
 
 // Returns indices of inflection points
-std::vector<std::size_t> find_inflections(std::vector<Vec2d > points, double threshold=ANGLE_THRESHOLD);
+std::vector<std::size_t> find_inflections(const std::vector<Vec2d>& points, double threshold=ANGLE_THRESHOLD);
+
+// Finds straight sides in the piece
+std::vector<std::pair<size_t, size_t>> find_straight_sides(const std::vector<Vec2d>& points, double ang_threshold = ANGLE_THRESHOLD);
 
 
-cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, std::vector<size_t> defects, bool draw_tangents);
+cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, std::vector<size_t> defects,
+                    std::vector<std::pair<size_t, size_t>> straight_edges, bool draw_tangents);
+
+/*
+ * Finds "runs", or consecutive items that pass a certain test.
+ * Returns a list of the runs as pairs, where for each pair:
+ *       first: The index which starts the run
+         second: The index one past the end of the run
+    Note that if all elements pass, this will return one pair with the first and last elements the same
+ */
+template <typename T>
+std::vector<std::pair<int, int>> find_runs(const std::vector<T> &vals, std::function<bool(const T)> test_func) {
+    auto pairs = std::vector<std::pair<int, int>>();
+    if (vals.size() < 1) {return pairs;} // Empty return for empty input
+    bool within_run = false; // This is unknown at first, will correct at end
+    for (size_t i = 0; i < vals.size(); ++i) {
+        bool item_valid = test_func(vals[i]);
+        // Starting new run
+        if (item_valid && !within_run) {
+            // Create new pair starting here
+            pairs.push_back(std::pair<int, int>(i, -1));
+            within_run = true;
+        }
+        // Ending run
+        else if (!item_valid && within_run) {
+            // Mark end of run
+            pairs[pairs.size() - 1].second = i;
+            within_run = false;
+        }
+    }
+    // If first and last runs are the same run
+    if (test_func(vals[0]) && test_func(vals[vals.size() - 1]) &&
+            pairs[pairs.size() - 1].second == -1) // Last run never finished
+        {
+        size_t true_start = pairs[pairs.size() - 1].first;
+        pairs[0].first = true_start;
+        // Remove the incomplete pair that was just joined
+        if (pairs.size() > 1) {
+            pairs.pop_back();
+        }
+    }
+    return pairs;
+}
 
 #endif
