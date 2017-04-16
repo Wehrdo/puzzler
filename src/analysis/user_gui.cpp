@@ -2,36 +2,40 @@
 #include "edge_tools.hpp"
 #include <math.h>
 
+
 using namespace std;
 using namespace cv;
 
-void PuzzleGUI::mouse_mv_cb(int event, int x, int y, int flags, void *obj) {
+void PuzzleGUI::mouse_cb(int event, int x, int y, int flags, void *obj) {
     PuzzleGUI* that = static_cast<PuzzleGUI*>(obj);
+    that->mouse_cb(event, x, y, flags);
+}
+
+void PuzzleGUI::mouse_cb(int event, int x, int y, int flags) {
     cv::Scalar red(0, 0, 255);
     cv::Scalar green(0, 255, 0);
-    that->piece_img.copyTo(that->buffer);
+    piece_img.copyTo(buffer);
     if (event == EVENT_LBUTTONUP) {
         // Finding first point
-        if (that->finding_pt == 0) {
-            that->start_pt_idx = that->find_nearest_point(Point(x, y));
-            circle(that->piece_img, that->local_pts[that->start_pt_idx], 10, green, CV_FILLED);
+        if (finding_pt == 0) {
+            start_pt_idx = find_nearest_point(Point(x, y));
+            circle(piece_img, local_pts[start_pt_idx], 10, green, CV_FILLED);
             // Toggle to second point
-            that->finding_pt = 1;
+            finding_pt = 1;
         }
         else {
-            that->end_pt_idx = that->find_nearest_point(Point(x, y));
-            that->finding_pt = 0;
-            that->draw_piece();
+            end_pt_idx = find_nearest_point(Point(x, y));
+            finding_pt = 0;
+            draw_piece();
         }
     }
-    if (that->finding_pt == 0) {
-        circle(that->buffer, Point(x, y), 10, green);
+    if (finding_pt == 0) {
+        circle(buffer, Point(x, y), 10, green);
     }
     else {
-        circle(that->buffer, Point(x, y), 10, red);
+        circle(buffer, Point(x, y), 10, red);
     }
-    imshow(that->window_name, that->buffer);
-    
+    imshow(window_name, buffer);
 }
 
 PuzzleGUI::PuzzleGUI(string name)
@@ -58,7 +62,9 @@ pair<size_t, size_t> PuzzleGUI::select_edge(Piece piece)
 
     namedWindow(window_name);
     // Any mouse event will call mouse_mv_cb
-    setMouseCallback(window_name, mouse_mv_cb, this);
+    setMouseCallback(window_name, mouse_cb, this);
+
+
     auto comp_x = [](cv::Point a, cv::Point b) { return a.x < b.x; };
     auto comp_y = [](cv::Point a, cv::Point b) { return a.y < b.y; };
 
@@ -112,12 +118,13 @@ void PuzzleGUI::draw_piece() {
 
     // Clear matrix
     piece_img = Scalar(0, 0, 0);
-
     // Draw the piece to matrix
     cv::Point last_pt = local_pts[local_pts.size() - 1];
     for (size_t i = 0; i < local_pts.size(); ++i) {
         cv::Point pt = local_pts[i];
-        if (i > start_pt_idx && i <= end_pt_idx) {
+        if ((i > start_pt_idx && i <= end_pt_idx && start_pt_idx <= end_pt_idx) || // Standard bounds
+            (start_pt_idx > end_pt_idx && (i > start_pt_idx || i < end_pt_idx))) // Bounds wrap around 0
+            {
             cv::line(piece_img, last_pt, pt, red, 3);
         } else {
             cv::line(piece_img, last_pt, pt, white);

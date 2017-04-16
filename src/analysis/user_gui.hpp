@@ -1,7 +1,6 @@
 #ifndef USER_GUI_HPP
 #define USER_GUI_HPP
 
-#include <functional>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 #include "piece.hpp"
@@ -13,14 +12,30 @@ public:
      * to be called after edge selection is done
      */
     PuzzleGUI(std::string win_name);
-    
+    /*
+     * When called, launches a window and lets the user select a start
+     * and end point on the puzzle. After the user hits the spacebar, 
+     * returns an inclusive start and end index
+     */
     std::pair<size_t, size_t> select_edge(Piece p);
+private:
     /*
      * Returns the index of the point nearest to the given point
      */
     size_t find_nearest_point(cv::Point given_p);
+    /*
+     * Draws the piece, as well as the user's selection on it
+     */
     void draw_piece();
-    static void mouse_mv_cb(int event, int x, int y, int flags, void *obj);
+    /*
+     * Callback for mouse events on the window
+     */
+    // Static version is to pass as OpenCV callback, where the *obj is *this
+    // It simply calls the class-member version of the function
+    static void mouse_cb(int event, int x, int y, int flags, void *obj);
+    // class-member version that gets called from the static version
+    void mouse_cb(int event, int x, int y, int flags);
+    
     std::string window_name;
     int window_width = 560;
 
