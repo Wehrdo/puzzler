@@ -4,11 +4,6 @@
 
 using namespace std;
 
-
-/*
- * Returns a wrapped index, e.g. index 42 of an array with 40 elements is 2
- * Index -1 of an array with 40 elements is 39
-*/
 int norm_idx(size_t n, size_t i) {
     ssize_t wrapped_i = i % n;
     if (wrapped_i < 0) {

@@ -5,3 +5,4 @@ bin
 build
 test
 test_piece
+.release_time

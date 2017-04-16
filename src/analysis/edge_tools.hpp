@@ -160,4 +160,10 @@ std::vector<std::pair<int, int>> find_runs(const std::vector<T> &vals, std::func
     return pairs;
 }
 
+/*
+ * Returns a wrapped index, e.g. index 42 of an array with 40 elements is 2
+ * Index -1 of an array with 40 elements is 39
+*/
+int norm_idx(size_t n, size_t i);
+
 #endif

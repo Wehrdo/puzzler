@@ -1,6 +1,7 @@
 #include "piece.hpp"
 #include "find_pieces.hpp"
 #include "edge_tools.hpp"
+#include "user_gui.hpp"
 
 #include <string>
 #include <vector>
@@ -44,6 +45,7 @@ void test_function(void)
 
    }
 
+
 void test_pieces(void)
    {
    std::vector<Piece> pieces;
@@ -54,6 +56,7 @@ void test_pieces(void)
    pieces = find_pieces( img );
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
+   PuzzleGUI gui("User GUI");
 
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
@@ -91,8 +94,9 @@ void test_pieces(void)
       // cv::destroyWindow(name );@
 
       processing.find_indents();
-//      processing.draw( 480 );
-      cv::waitKey(0);
+      std::pair<size_t, size_t> selection = gui.select_edge(processing);
+//      processing.draw( 80 );
+    //   cv::waitKey(0);
       }
    }
 
