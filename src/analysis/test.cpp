@@ -97,6 +97,9 @@ void test_pieces(void)
       std::pair<size_t, size_t> selection = gui.select_edge(processing);
 //      processing.draw( 80 );
     //   cv::waitKey(0);
+      processing.find_outdents();
+      processing.draw( 480 );
+      cv::waitKey(0);
       }
    }
 

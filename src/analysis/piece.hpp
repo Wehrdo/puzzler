@@ -28,6 +28,7 @@ class Piece
       Piece( std::vector<Vec2d> points )
          {
          this->points = points;
+
          }
 
       // Member functions
@@ -37,6 +38,8 @@ class Piece
       //TODO: Move draw function here
 
       void find_indents( void );
+      void find_outdents( void );
+      void find_outdents_old( void );
       void draw( unsigned int width );
    };
 
