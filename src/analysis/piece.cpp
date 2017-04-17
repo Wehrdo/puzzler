@@ -233,6 +233,20 @@ void Piece::find_outdents( void )
 
          // Find ellipse of best fit
          cv::RotatedRect best_fit = fitEllipse( curve );
+         cv::Point2f circ;
+         float radius;
+         cv::minEnclosingCircle( curve, circ, radius );
+
+         // compare area of circle with area of rotated rect
+         float circ_area = M_PI*pow(radius, 2);
+         float rect_area = best_fit.size.area();
+         float ratio_area = circ_area / rect_area;
+         std::cout << "circle area: " << circ_area << std::endl;
+         std::cout << "rect area: " << rect_area << std::endl;
+         std:: cout << "ratio of areas " << ratio_area << std::endl;
+
+         if( ratio_area < 0.8 || ratio_area > 1.5 )
+            continue;
 
          // Add to the piece's curve list
          Curve to_add( inflection_index[first_infl], inflection_index[second_infl], cv::Point( best_fit.center), Curve::outdent );
@@ -293,7 +307,6 @@ void Piece::find_outdents_old( void )
          cv::RotatedRect best_fit = fitEllipse( curve );
 
          bool tmp;
-
          Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::outdent );
          curves.push_back( to_add );
          }

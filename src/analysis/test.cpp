@@ -56,7 +56,7 @@ void test_pieces(void)
    pieces = find_pieces( img );
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
-   PuzzleGUI gui("User GUI");
+   //PuzzleGUI gui("User GUI");
 
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
@@ -94,7 +94,7 @@ void test_pieces(void)
       // cv::destroyWindow(name );@
 
       processing.find_indents();
-      std::pair<size_t, size_t> selection = gui.select_edge(processing);
+      //      std::pair<size_t, size_t> selection = gui.select_edge(processing);
 //      processing.draw( 80 );
     //   cv::waitKey(0);
       processing.find_outdents();
@@ -110,6 +110,6 @@ int main()
    cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
 
    test_pieces();
-   
+
    return 0;
 };
