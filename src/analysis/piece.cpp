@@ -19,6 +19,7 @@ void Piece::process_cvx_hull()
 
    cv::convexHull( contour, hull_index );
    std::vector<cv::Vec4i> defects;
+   std::sort( hull_index.begin(), hull_index.end() );
    cv::convexityDefects( contour, hull_index, defects );
 
    unsigned int i;
@@ -131,6 +132,120 @@ void Piece::find_indents( void )
 
 void Piece::find_outdents( void )
    {
+   // Find our inflection point indexes.
+   for( unsigned int first_infl = 0; first_infl < inflection_index.size(); first_infl++ )
+      {
+      bool wrapped = false;
+      unsigned int second_infl = next_index( inflection_index, first_infl, wrapped );
+
+      std::cout << "ifnl points: first, " << inflection_index[first_infl] << " second, " << inflection_index[second_infl] << std::endl;
+
+
+      cv::Point first = contour[ inflection_index[ first_infl ] ];
+      cv::Point second = contour[ inflection_index[ second_infl ] ];
+
+      // Find the equation of the line between them
+      float A = -1.0 * ( second.y - first.y );
+      float B = second.x - first.x;
+      float C = -1.0*(A*first.x) - (B*first.y);
+
+      // Iterate until find first hull pt between first and second
+      unsigned int hull_idx = 0;
+      wrapped = false;
+      while( hull_index[hull_idx] < inflection_index[ first_infl ] )
+         {
+         hull_idx = next_index( hull_index, hull_idx, wrapped );
+         }
+
+
+      if(
+         (inflection_index[first_infl] < inflection_index[second_infl] &&
+          hull_index[hull_idx] > inflection_index[second_infl]
+         )
+          ||
+         (
+          inflection_index[first_infl] > inflection_index[second_infl] &&
+          hull_index[hull_idx] < inflection_index[first_infl] &&
+          hull_index[hull_idx] > inflection_index[second_infl]
+         )
+        )
+         {
+         std::cout << "No convex between these infl pts" << std::endl;
+         continue;
+         }
+
+
+      std::cout << "convex point: " << hull_index[hull_idx] << std::endl;
+
+      // Find furthest pt between first and second from line
+      wrapped = false;
+      float max_distance = 0.0;
+      cv::Point max_pt;
+      while( (inflection_index[second_infl] > inflection_index[first_infl] &&
+              hull_index[hull_idx] < inflection_index[ second_infl ])
+             || (inflection_index[second_infl] < inflection_index[first_infl] &&
+                 ( hull_index[hull_idx] < inflection_index[second_infl] ||
+                   hull_index[hull_idx] > inflection_index[first_infl] )
+                )
+         )
+         {
+
+         cv::Point pt = contour[hull_index[hull_idx]];
+         float distance = abs( A*pt.x + B*pt.y + C ) / sqrt( pow(A, 2) + pow(B, 2) );
+         if( distance > max_distance )
+            {
+            max_pt = pt;
+            max_distance = distance;
+            }
+         hull_idx = next_index( hull_index, hull_idx, wrapped );
+         }
+
+      // Calculate tangent lines
+      cv::Point first_slp, second_slp, ins_pt;
+      first_slp = find_tangent_angle( inflection_index[first_infl], contour );
+      second_slp = find_tangent_angle( inflection_index[second_infl], contour );
+
+      // do they intersect?
+      bool intersect = intersect_lines( first_slp, second_slp, first, second, ins_pt );
+
+      int within = pointPolygonTest( contour, ins_pt, false );
+
+      std::cout << "Lines do " << (intersect?"":"not ") << "intersect" << std::endl;
+
+      std::cout << "Lines intersect at " << ins_pt << std::endl;
+
+      // If intersect within piece
+      if( intersect && (within > 0 ) )
+         {
+
+         std::cout << "Tanget lines crossed inside, finding points along curve" << std::endl;
+
+         // Find points that characterize curve
+         unsigned int start = inflection_index[first_infl];
+         std::vector<cv::Point> curve;
+         wrapped = false;
+         while( start != inflection_index[second_infl] )
+            {
+            curve.push_back( contour[start] );
+            start = next_index( contour, start, wrapped );
+            std::cout << "Adding point " << start << " to curve." << std::endl;
+            }
+
+         // Find ellipse of best fit
+         cv::RotatedRect best_fit = fitEllipse( curve );
+
+         // Add to the piece's curve list
+         Curve to_add( inflection_index[first_infl], inflection_index[second_infl], cv::Point( best_fit.center), Curve::outdent );
+         curves.push_back(to_add);
+
+         std::cout << "Found a curve! We've found " << curves.size() << " so far." << std::endl;
+         std::cout << "coords: first, max, second, centre: " << first << second << max_pt << best_fit.center << std::endl;
+         }
+      }
+   }
+
+void Piece::find_outdents_old( void )
+   {
    for( unsigned int hull_idx = 0; hull_idx < hull_index.size(); hull_idx++ )
       {
       unsigned int hull = hull_index[hull_idx];
@@ -142,7 +257,6 @@ void Piece::find_outdents( void )
          {
          inf_idx = next_index( inflection_index, inf_idx, wrapped );
          }
-
 
       // Find inflection points before and after maxima
       unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
@@ -244,10 +358,20 @@ void Piece::draw( unsigned int width )
       {
       cv::Point centre = convert_coord( curve.origin );
       cv::Scalar color;
+
+
       if( curve.type == Curve::indent )
          color = blue;
       else
          color = red;
+
+      unsigned int idx = curve.start;
+      while( idx != curve.end )
+         {
+         bool wrapped;
+         cv::circle( out_img, convert_coord(contour[idx]), 5, color );
+         idx = next_index( contour, idx, wrapped );
+         }
 
       cv::circle(out_img, centre, 20, color );
       }
