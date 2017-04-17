@@ -4,7 +4,18 @@
 
 #include <cstdio>
 
+void Piece::process( void )
+   {
+   process_cvx_hull();
+   find_indents();
+   find_outdents();
 
+   }
+
+void Piece::set_inflection( std::vector<std::size_t> infl )
+   {
+   this->inflection_index = infl;
+   }
 
 void Piece::process_cvx_hull()
    {
@@ -152,15 +163,16 @@ void Piece::find_outdents( void )
       // Iterate until find first hull pt between first and second
       unsigned int hull_idx = 0;
       wrapped = false;
-      while( hull_index[hull_idx] < inflection_index[ first_infl ] )
+      while( hull_index[hull_idx] < inflection_index[ first_infl ] && !wrapped)
          {
          hull_idx = next_index( hull_index, hull_idx, wrapped );
          }
 
-
+      std::cout << "convex point: " << hull_index[hull_idx] << std::endl;
       if(
          (inflection_index[first_infl] < inflection_index[second_infl] &&
-          hull_index[hull_idx] > inflection_index[second_infl]
+          (hull_index[hull_idx] >= inflection_index[second_infl] ||
+           hull_index[hull_idx] <= inflection_index[first_infl] )
          )
           ||
          (
@@ -175,7 +187,7 @@ void Piece::find_outdents( void )
          }
 
 
-      std::cout << "convex point: " << hull_index[hull_idx] << std::endl;
+
 
       // Find furthest pt between first and second from line
       wrapped = false;

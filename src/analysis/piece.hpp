@@ -37,6 +37,8 @@ class Piece
       //TODO: Move inflection point calc here
       //TODO: Move draw function here
 
+      void process( void );
+      void set_inflection( std::vector<std::size_t> infl );
       void find_indents( void );
       void find_outdents( void );
       void find_outdents_old( void );

@@ -50,13 +50,14 @@ void test_pieces(void)
    {
    std::vector<Piece> pieces;
 
-   cv::Mat img = cv::imread( "../../images/rows/row1_shrunk.png", 1 );
+   //cv::Mat img = cv::imread( "../../images/rows/row1_shrunk.png", 1 );
+   cv::Mat img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
 
    // Find pieces
    pieces = find_pieces( img );
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
-   //PuzzleGUI gui("User GUI");
+   PuzzleGUI gui("User GUI");
 
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
@@ -67,18 +68,10 @@ void test_pieces(void)
       {
       Piece processing = pieces[i];
 
-      printf("Piece %d has %lu points\n", i, processing.points.size());
-      fflush(stdout);
-
       // find convex hull
-      processing.process_cvx_hull();
-      std::cout << "Piece " << i << " has " << processing.hull_index.size() << " points in the convex hull." << std::endl;
-
       infl_indices = find_inflections(processing.points);
-      std::cout << "Piece " << i << " has " << infl_indices.size() << " inflection points." << std::endl;
-      processing.inflection_index = infl_indices;
-      // draw to matrix
-      //      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, true);
+      processing.set_inflection( infl_indices );
+      processing.process();
 
       auto straight_lines = find_straight_sides(processing.points, ((M_PI / 180) * 0.5));
 
@@ -93,11 +86,10 @@ void test_pieces(void)
       // cv::waitKey(0);
       // cv::destroyWindow(name );@
 
-      processing.find_indents();
       //      std::pair<size_t, size_t> selection = gui.select_edge(processing);
 //      processing.draw( 80 );
     //   cv::waitKey(0);
-      processing.find_outdents();
+
       processing.draw( 480 );
       cv::waitKey(0);
       }
