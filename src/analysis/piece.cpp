@@ -140,11 +140,11 @@ void Piece::find_indents( void )
          unsigned int start = prv_inf;
          std::vector<cv::Point> curve;
          wrapped = false;
-         while( start != nxt_inf )
+         while( start != (nxt_inf+1) )
             {
             curve.push_back( contour[start] );
-            start = next_index( contour, start, wrapped );
             std::cout << "Adding point " << start << " to curve." << std::endl;
+            start = next_index( contour, start, wrapped );
             }
          // Find the center of indent
          cv::RotatedRect best_fit = fitEllipse( curve );
@@ -207,15 +207,13 @@ void Piece::find_outdents( void )
          continue;
          }
 
-
-
-
       // Find furthest pt between first and second from line
       wrapped = false;
       float max_distance = 0.0;
       cv::Point max_pt;
       while( (inflection_index[second_infl] > inflection_index[first_infl] &&
-              hull_index[hull_idx] < inflection_index[ second_infl ])
+              hull_index[hull_idx] < inflection_index[ second_infl ] &&
+                !wrapped )
              || (inflection_index[second_infl] < inflection_index[first_infl] &&
                  ( hull_index[hull_idx] < inflection_index[second_infl] ||
                    hull_index[hull_idx] > inflection_index[first_infl] )
@@ -253,15 +251,33 @@ void Piece::find_outdents( void )
 
          std::cout << "Tanget lines crossed inside, finding points along curve" << std::endl;
 
+         // Check if start/stop points have already been used
+         bool fake_curve = false;
+         for( Curve past_curve : curves )
+            {
+
+            std::cout << "Comparing " << past_curve.start << " and " << (inflection_index[second_infl] ) << std::endl;
+            std::cout << "Comparing " << past_curve.end << " and " << (inflection_index[first_infl] ) << std::endl;
+
+
+            if( past_curve.start == (inflection_index[second_infl]) ||
+                past_curve.end == inflection_index[first_infl] )
+               fake_curve = true;
+            }
+
+         if( fake_curve )
+            continue;
+
+
          // Find points that characterize curve
          unsigned int start = inflection_index[first_infl];
          std::vector<cv::Point> curve;
          wrapped = false;
-         while( start != inflection_index[second_infl] )
+         while( start != (inflection_index[second_infl]+1) )
             {
             curve.push_back( contour[start] );
-            start = next_index( contour, start, wrapped );
             std::cout << "Adding point " << start << " to curve." << std::endl;
+            start = next_index( contour, start, wrapped );
             }
 
          // Find ellipse of best fit
@@ -291,60 +307,6 @@ void Piece::find_outdents( void )
       }
    }
 
-void Piece::find_outdents_old( void )
-   {
-   for( unsigned int hull_idx = 0; hull_idx < hull_index.size(); hull_idx++ )
-      {
-      unsigned int hull = hull_index[hull_idx];
-      unsigned int inf_idx = 0;
-      bool wrapped = false;
-
-      // Iterate until find inflection just past maxima
-      while( inflection_index[inf_idx] < hull && !wrapped )
-         {
-         inf_idx = next_index( inflection_index, inf_idx, wrapped );
-         }
-
-      // Find inflection points before and after maxima
-      unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
-      unsigned int nxt_inf = inflection_index[inf_idx];
-
-      // Calculate tanget lines from inflection points
-      cv::Point prv_slp, nxt_slp, prv, nxt, ins_pt;
-      prv_slp = find_tangent_angle( prv_inf, contour );
-      nxt_slp = find_tangent_angle( nxt_inf, contour );
-
-      prv = contour[prv_inf];
-      nxt = contour[nxt_inf];
-
-      bool intersect = intersect_lines( prv_slp, nxt_slp, prv, nxt, ins_pt );
-
-      std::cout << "Distance between previous and ins: " << cv::norm(prv - ins_pt) <<
-         "\nDistance between nxt and ins: " << cv::norm(nxt - ins_pt ) << std::endl;
-
-      int within = pointPolygonTest( contour, ins_pt, false );
-      if( intersect && ( within > 0 ) )
-         {
-
-         std::vector<cv::Point> curve;
-         unsigned int start = prv_inf;
-         bool wrapped = false;
-
-         while( start != nxt_inf )
-            {
-            curve.push_back( contour[start] );
-            start = next_index( contour, start, wrapped );
-            }
-
-         // Find the center of indent
-         cv::RotatedRect best_fit = fitEllipse( curve );
-
-         bool tmp;
-         Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::outdent );
-         curves.push_back( to_add );
-         }
-      }
-   }
 
 void Piece::draw( unsigned int width )
    {
