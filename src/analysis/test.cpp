@@ -14,12 +14,15 @@
 
 Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    {
-   cv::Point start = input.contour[start_idx];
-   cv::Point end = input.contour[end_idx];
-   cv::Point corner;
-   // length of corner side
+   // working points
+   cv::Point2f start = input.contour[start_idx];
+   cv::Point2f end = input.contour[end_idx];
+   cv::Point2f corner;
+
+   // length of corner we are creating
    float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2);
 
+   // Starting point, along X axis with offset
    corner.x = start.x + length;
    corner.y = start.y;
 
@@ -27,11 +30,12 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    float slope = (end.y - start.y)/(end.x - start.x);
    float inter = start.y - slope*start.x;
 
-   // rotate 45 degrees from existing line, compensate for existing skew
+   // rotate 45 degrees from existing line
    float angle = -45.0;
    float y = slope*corner.x + inter;
    float side_part = sqrt( pow(start.x - corner.x, 2) + pow(start.y - y, 2));
 
+   // rotate be amount existing line is from normal
    angle -= acos(length/side_part)*180.0/M_PI;
    cv::Mat trans = cv::getRotationMatrix2D( start, angle, 1 );
    std::vector<cv::Point> to_transform(1, corner );
@@ -39,11 +43,20 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    cv::transform( to_transform, transformed, trans );
 
    Piece to_return;
+
+   // Copy over selected points
    to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
    to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
 
+   // Add new point
    to_return.contour.push_back( transformed[0] );
    to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
+
+
+   // Find inflection points, process
+   std::vector<size_t> infl_idx = find_inflections( fake.points );
+   fake.set_inflection( infl_idx );
+   fake.process();
 
    return to_return;
 
@@ -108,16 +121,15 @@ void test_pieces(void)
    found = find_pieces( row4 );
    pieces.insert( pieces.end(), found.begin(), found.end() );
 
+   // Take in image that we are matching to
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
 
-
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
-
    PuzzleGUI gui("User GUI");
-
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
+
 
    std::string win_name = "Piece ";
    unsigned int i;
@@ -125,8 +137,8 @@ void test_pieces(void)
       {
       Piece processing = pieces[i];
 
-      // find convex hull
-      infl_indices = find_inflections(processing.points);
+      // Find inflection points and process pieces
+      infl_indices = find_inflections(processing.points, ((M_PI / 180) * 40));
       processing.set_inflection( infl_indices );
       processing.process();
 
@@ -145,22 +157,22 @@ void test_pieces(void)
 
       // Process the edge we are testing for
 
-
-      //      processing.draw( 80 );
-    //   cv::waitKey(0);
-
-      processing.draw( 480 );
-      std::cout << "Showing image " << i << std::endl;
-      cv::waitKey(0);
+      //processing.draw( 480 );
+      //std::cout << "Showing image " << i << std::endl;
+      //cv::waitKey(0);
       }
 
    // // Prompt user for image
-   // std::pair<size_t, size_t> selection = gui.select_edge( match_to );
+   std::pair<size_t, size_t> selection = gui.select_edge( match_to );
 
    // // Extract first and last points from selected region
-   // size_t start_idx = std::get<0>(selection);
-   // size_t end_idx = std::get<1>(selection);
+   size_t start_idx = std::get<0>(selection);
+   size_t end_idx = std::get<1>(selection);
 
+   Piece fake = piece_to_fake( match_to, start_idx, end_idx );
+
+   fake.draw( 480 );
+   cv::waitKey(0);
 
 
    // // Create mocked up edge
@@ -182,15 +194,6 @@ void test_pieces(void)
    // should_match.points = to_add;
    // should_match.types.push_back( Curve::outdent );
    // should_match.types.push_back( Curve::indent );
-
-
-   // Piece fake = piece_to_fake( match_to, start_idx, end_idx );
-
-   // std::vector<size_t> infl_idx = find_inflections( fake.points );
-   // fake.set_inflection( infl_idx );
-   // fake.process();
-   // fake.draw( 480 );
-   // cv::waitKey(0);
 
    }
 
