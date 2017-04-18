@@ -9,20 +9,26 @@ class Edge
       cv::Point origin;
       cv::Point handle;
       std::vector<cv::Point> points;
-      std::vector<curve_type> types;
+      std::vector<Curve::curve_type> types;
+
+      Edge( void )
+         {
+
+         }
 
       Edge( Piece piece, std::vector<Curve> curves )
          {
          this->origin = curves[0].origin;
 
          if( curves.size() >= 1 )
-            this->handle = curves[1].origin;
+            this->handle = curves[curves.size()-1].origin;
 
          this->points = std::vector<cv::Point>(
             &(piece.contour[curves[0].start]),
             &(piece.contour[curves[curves.size()-1].end]) );
 
-         this->types = curves.type;
+         for( Curve curve : curves )
+            this->types.push_back( curve.type );
          }
 
 
@@ -44,17 +50,17 @@ class Edge
          {
          // Rotate wrt point and handle
 
-         angle = this.dot(that)
+         float angle = this->handle.dot(that);
 
-         float len1 = sqrt(v1.x * v1.x + v1.y * v1.y);
-         float len2 = sqrt(v2.x * v2.x + v2.y * v2.y);
+         float len1 = sqrt(this->handle.x * this->handle.x + this->handle.y * this->handle.y);
+         float len2 = sqrt(that.x * that.x + that.y * that.y);
 
-         float a = this.dot(that) / (len1 * len2);
+         float a = this->handle.dot(that) / (len1 * len2);
 
          angle = (a >= 0 ? 1.0 : -1.0) * acos(a);
 
-         cv::Mat transformation = cv::getRotationMatrix2D(this.origin,angl,1);
-         cv::warpAffine(this.points,this.points,transformation, this.points.size());
+         cv::Mat transformation = cv::getRotationMatrix2D(this->origin,angle,1);
+         cv::transform(this->points,this->points,transformation);
          }
 
       float compare( Edge that )
@@ -62,6 +68,6 @@ class Edge
          // Compare with another edge
          }
 
-   }
+   };
 
 #endif /* EDGE_H */

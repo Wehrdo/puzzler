@@ -100,6 +100,8 @@ bool intersect_lines(cv::Point v1, cv::Point v2, cv::Point o1, cv::Point o2, cv:
 
 void Piece::find_indents( void )
    {
+   std::cout << "Finding indents" << std::endl;
+
    for( unsigned int dft_idx = 0; dft_idx < defect_index.size(); dft_idx++ )
       {
       unsigned int defect = defect_index[dft_idx];
@@ -125,24 +127,43 @@ void Piece::find_indents( void )
       prv = contour[prv_inf];
       nxt = contour[nxt_inf];
 
+      std::cout << "Considering inflection points: " << prv_inf << nxt_inf << std::endl;
+
       bool intersect = intersect_lines( prv_slp, nxt_slp, prv, nxt, ins_pt );
+      std::cout << "Lines " << (intersect?"do ":"do not ") << "intersect" << std::endl;
       int within = pointPolygonTest( contour, ins_pt, false );
       if( intersect && !( within > 0 ) )
          {
+         std::cout << "Lines crossed outside shape" << std::endl;
+         //unsigned int start = inflection_index[prv_inf];
+         wrapped = false;
+         unsigned int start = prv_inf;
+         std::vector<cv::Point> curve;
+         wrapped = false;
+         while( start != nxt_inf )
+            {
+            curve.push_back( contour[start] );
+            start = next_index( contour, start, wrapped );
+            std::cout << "Adding point " << start << " to curve." << std::endl;
+            }
          // Find the center of indent
-         cv::RotatedRect best_fit = fitEllipse(
-            std::vector<cv::Point>( &(contour[prv_inf]), &(contour[nxt_inf]) ) );
+         cv::RotatedRect best_fit = fitEllipse( curve );
 
          bool tmp;
 
          Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::indent );
          curves.push_back( to_add );
+
+         std::cout << "Found a curve! We've found " << curves.size() << " so far." << std::endl;
+         std::cout << "coords: first, second, centre: " << prv << nxt << best_fit.center << std::endl;
+
          }
       }
    }
 
 void Piece::find_outdents( void )
    {
+   std::cout << "Finding outdents" << std::endl;
    // Find our inflection point indexes.
    for( unsigned int first_infl = 0; first_infl < inflection_index.size(); first_infl++ )
       {

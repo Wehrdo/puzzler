@@ -1,4 +1,5 @@
 #include "piece.hpp"
+#include "edge.hpp"
 #include "find_pieces.hpp"
 #include "edge_tools.hpp"
 #include "user_gui.hpp"
@@ -50,11 +51,23 @@ void test_pieces(void)
    {
    std::vector<Piece> pieces;
 
-   //cv::Mat img = cv::imread( "../../images/rows/row1_shrunk.png", 1 );
-   cv::Mat img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
+   // Pieces to process
+   cv::Mat row1 = cv::imread( "../../images/rows/row1_shrunk.png", 1 );
+   cv::Mat row2 = cv::imread( "../../images/rows/row2_shrunk.png", 1 );
+
+   // Pieces matching to
+   cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
 
    // Find pieces
-   pieces = find_pieces( img );
+   std::vector<Piece> found = find_pieces( row1 );
+   pieces.insert( pieces.end(), found.begin(), found.end() );
+   found = find_pieces( row2 );
+   pieces.insert( pieces.end(), found.begin(), found.end() );
+
+   std::vector<Piece> match_to_vec = find_pieces( test_img );
+   Piece match_to = match_to_vec[0];
+
+
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
    PuzzleGUI gui("User GUI");
@@ -86,14 +99,49 @@ void test_pieces(void)
       // cv::waitKey(0);
       // cv::destroyWindow(name );@
 
-      //      std::pair<size_t, size_t> selection = gui.select_edge(processing);
-//      processing.draw( 80 );
+      // Process the edge we are testing for
+
+
+      //      processing.draw( 80 );
     //   cv::waitKey(0);
 
       processing.draw( 480 );
       cv::waitKey(0);
       }
+
+   // Prompt user for image
+   std::pair<size_t, size_t> selection = gui.select_edge( match_to );
+
+   // Extract first and last points from selected region
+   size_t start_idx = std::get<0>(selection);
+   size_t end_idx = std::get<1>(selection);
+
+   cv::Point start = match_to.contour[start_idx];
+   cv::Point end = match_to.contour[end_idx];
+
+   // Create mocked up edge
+   Edge match_edge;
+   match_edge.origin = cv::Point( 389.761, 707.396 );
+   match_edge.handle = cv::Point( 541.796, 1003.53 );
+   match_edge.points = std::vector<cv::Point>(&(match_to.contour[start_idx]), &(match_to.contour[end_idx]) );
+   match_edge.types.push_back( Curve::outdent );
+   match_edge.types.push_back( Curve::indent );
+
+   Edge should_match;
+   should_match.origin = cv::Point( 880.307, 1970.96 );
+   should_match.handle = cv::Point( 995.534, 2282.31 );
+   std::vector<cv::Point> to_add_1( &(pieces[6].contour[65]), &(pieces[6].contour[110]));
+   std::vector<cv::Point> to_add_2( &(pieces[6].contour[0]), &(pieces[6].contour[7]));
+   std::vector<cv::Point> to_add;
+   to_add.insert(to_add.end(), to_add_1.begin(), to_add_1.end() );
+   to_add.insert(to_add.end(), to_add_2.begin(), to_add_2.end() );
+   should_match.points = to_add;
+   should_match.types.push_back( Curve::outdent );
+   should_match.types.push_back( Curve::indent );
+
+
    }
+
 
 
 

@@ -1,0 +1,7 @@
+from faked piece
+[389.761, 707.396] - outdent
+[541.796, 1003.53] - indent
+
+from true fitting piece
+[880.307, 1970.96] - outdent
+[995.534, 2282.31] - indent
