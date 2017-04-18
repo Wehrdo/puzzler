@@ -86,16 +86,27 @@ float Edge::compare(const Edge &that)
     // }
     vector<Point> a(points.begin(), points.begin() + n_points);
     vector<Point> b(moved_pts.begin(), moved_pts.begin() + n_points);
-    reverse(b.begin(), b.end());
+    reverse(b.begin(), b.end()); 
     // Mat a = Mat(vector<Point>(points.begin(), points.begin() + n_points));
     // Mat b = Mat(vector<Point>(that.points.begin(), that.points.begin() + n_points));
     namedWindow("augh");
-    imshow("augh", draw_curve(a, 480));
-    waitKey(0);
-    imshow("augh", draw_curve(b, 480));
-    waitKey(0);
+    // imshow("augh", draw_curve(a, 480));
+    // waitKey(0);
+    // imshow("augh", draw_curve(b, 480));
+    // waitKey(0);
     
-    Mat opt_tran = estimateRigidTransform(a, b, false);
+    Mat opt_tran = estimateRigidTransform(b, a, false);
+    if (opt_tran.rows == 0) {
+        // failure
+        cout << "Failed to find a transform" << endl;
+        return INFINITY;
+    } 
+    transform(moved_pts, moved_pts, opt_tran);
+    vector<Point> all_pts(a);
+    all_pts.insert(all_pts.end(), moved_pts.begin(), moved_pts.end());
+    Mat moved_curve = draw_curve(all_pts, 480);
+    imshow("augh", moved_curve);
+    waitKey(0);
     cout << "opt_tran = " << endl << opt_tran << endl;
     return 0;
 }
