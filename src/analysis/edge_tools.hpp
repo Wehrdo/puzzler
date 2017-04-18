@@ -115,7 +115,7 @@ std::vector<std::size_t> find_inflections(const std::vector<Vec2d>& points, doub
 // Finds straight sides in the piece
 std::vector<std::pair<size_t, size_t>> find_straight_sides(const std::vector<Vec2d>& points, double ang_threshold = ANGLE_THRESHOLD);
 
-
+cv::Mat draw_curve(const std::vector<cv::Point>& points, int width);
 cv::Mat draw_curve(const std::vector<Vec2d>& points, int width, std::vector<size_t> inflections, std::vector<size_t> defects,
                     std::vector<std::pair<size_t, size_t>> straight_edges, bool draw_tangents);
 

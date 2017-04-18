@@ -1,6 +1,7 @@
 #include "edge.hpp"
 #include <math.h>
 #include <iostream>
+#include <algorithm>
 #define RAD_TO_DEG (180.0 / M_PI)
 
 using namespace std;
@@ -75,28 +76,26 @@ float Edge::compare(const Edge &that)
 
     // optimal transform from the moved and rotated "that" to "this"
     // cv::Mat opt_tran = estimateRigidTransform(moved_pts, points, false);
-    Mat opt_tran(3, 4, CV_64F);
     // vector<Point3f> inliers;
-    vector<Point3f> this_points3;
-    vector<Point3f> that_points3;
+    int n_points = min(points.size(), that.points.size());
     // for (Point p : points) {
     //     this_points3.push_back(Point3i(p.x, p.y, 0));
     // }
     // for (Point p : that.points) {
     //     that_points3.push_back(Point3i(p.x, p.y, 0));
     // }
-    Mat a = Mat(points, CV_32F);
-    Mat b = Mat(that.points, CV_32F);
-    Mat inliers;
-    // Mat a3(a.size(), CV_MAKE_TYPE(a.type(), 3));
-    Mat a3(a.size(), CV_MAKE_TYPE(a.type(), 3));
-    Mat b3(b.size(), CV_MAKE_TYPE(b.type(), 3));
-    int copy_method[4] = {0,0, 1,1};
-    mixChannels(&a, 1, &a3, 1, copy_method, 2);
-    mixChannels(&b, 1, &b3, 1, copy_method, 2);
-    cout << "Checkvec: " << a3.checkVector(3) << endl;
-    cout << "Checkvec: " << b3.checkVector(3) << endl;
-    estimateAffine3D(a3, b3, opt_tran, inliers);
+    vector<Point> a(points.begin(), points.begin() + n_points);
+    vector<Point> b(moved_pts.begin(), moved_pts.begin() + n_points);
+    reverse(b.begin(), b.end());
+    // Mat a = Mat(vector<Point>(points.begin(), points.begin() + n_points));
+    // Mat b = Mat(vector<Point>(that.points.begin(), that.points.begin() + n_points));
+    namedWindow("augh");
+    imshow("augh", draw_curve(a, 480));
+    waitKey(0);
+    imshow("augh", draw_curve(b, 480));
+    waitKey(0);
+    
+    Mat opt_tran = estimateRigidTransform(a, b, false);
     cout << "opt_tran = " << endl << opt_tran << endl;
     return 0;
 }

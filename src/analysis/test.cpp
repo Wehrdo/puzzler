@@ -139,17 +139,13 @@ void test_pieces(void)
    should_match.types.push_back( Curve::outdent );
    should_match.types.push_back( Curve::indent );
 
-
+   match_edge.compare(should_match);
    }
-
-
-
 
 int main()
    {
    cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
 
    test_pieces();
-
    return 0;
 };
