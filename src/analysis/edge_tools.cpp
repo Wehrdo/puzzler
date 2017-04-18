@@ -19,6 +19,15 @@ Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
     return points[left_idx] - points[right_idx];
 }
 
+
+cv::Mat draw_curve(const vector<cv::Point>& points, int width) {
+    vector<Vec2d> as_vecs(points.size());
+    for (int i = 0; i < points.size(); ++i) {
+        as_vecs[i] = Vec2d(points[i].x, points[i].y);
+    }
+    return draw_curve(as_vecs, width, vector<size_t>(), vector<size_t>(), vector<pair<size_t, size_t>>(), false);
+}
+
 cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflections, vector<size_t> defects,
                     std::vector<std::pair<size_t, size_t>> straight_edges, bool draw_tangents) {
     auto comp_x = [](Vec2d a, Vec2d b) {return a.x < b.x;};
@@ -80,13 +89,13 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
 
     // Just for testing
 
-    Vec2d first_tan = find_tangent_angle(inflections[0], points);
-    Vec2d last_tan = find_tangent_angle(inflections[inflections.size() - 1], points);
-    Vec2d first_point = points[inflections[0]];
-    Vec2d last_point = points[inflections[inflections.size() - 1]];
-    Vec2d intersection_pt;
-    bool intersect = intersect_lines(first_tan, last_tan, first_point, last_point, intersection_pt);
-    if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 10, blue);}
+    // Vec2d first_tan = find_tangent_angle(inflections[0], points);
+    // Vec2d last_tan = find_tangent_angle(inflections[inflections.size() - 1], points);
+    // Vec2d first_point = points[inflections[0]];
+    // Vec2d last_point = points[inflections[inflections.size() - 1]];
+    // Vec2d intersection_pt;
+    // bool intersect = intersect_lines(first_tan, last_tan, first_point, last_point, intersection_pt);
+    // if (intersect) {cv::circle(out_img, convert_coord(intersection_pt), 10, blue);}
 
     return out_img;
 }

@@ -171,8 +171,6 @@ void test_pieces(void)
 
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
 
-   fake.draw( 480 );
-   cv::waitKey(0);
 
 
    // // Create mocked up edge
@@ -195,15 +193,15 @@ void test_pieces(void)
    // should_match.types.push_back( Curve::outdent );
    // should_match.types.push_back( Curve::indent );
 
+
+
+   match_edge.compare(should_match);
    }
-
-
 
 int main()
    {
    cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
 
    test_pieces();
-
    return 0;
 };
