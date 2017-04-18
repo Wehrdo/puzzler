@@ -11,6 +11,44 @@
 #include <functional>
 #include <opencv2/opencv.hpp>
 
+
+Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
+   {
+   cv::Point start = input.contour[start_idx];
+   cv::Point end = input.contour[end_idx];
+   cv::Point corner;
+   // length of corner side
+   float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2);
+
+   corner.x = start.x + length;
+   corner.y = start.y;
+
+   // Equation of line
+   float slope = (end.y - start.y)/(end.x - start.x);
+   float inter = start.y - slope*start.x;
+
+   // rotate 45 degrees from existing line, compensate for existing skew
+   float angle = -45.0;
+   float y = slope*corner.x + inter;
+   float side_part = sqrt( pow(start.x - corner.x, 2) + pow(start.y - y, 2));
+
+   angle -= acos(length/side_part)*180.0/M_PI;
+   cv::Mat trans = cv::getRotationMatrix2D( start, angle, 1 );
+   std::vector<cv::Point> to_transform(1, corner );
+   std::vector<cv::Point> transformed;
+   cv::transform( to_transform, transformed, trans );
+
+   Piece to_return;
+   to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
+   to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
+
+   to_return.contour.push_back( transformed[0] );
+   to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
+
+   return to_return;
+
+   }
+
 std::vector<Vec2d> gen_curve(int N, double start, double end, std::function<double(double)> func) {
     std::vector<Vec2d> points;
     double range = end - start;
@@ -105,8 +143,8 @@ void test_pieces(void)
       //      processing.draw( 80 );
     //   cv::waitKey(0);
 
-      processing.draw( 480 );
-      cv::waitKey(0);
+      //      processing.draw( 480 );
+      //cv::waitKey(0);
       }
 
    // Prompt user for image
@@ -116,8 +154,7 @@ void test_pieces(void)
    size_t start_idx = std::get<0>(selection);
    size_t end_idx = std::get<1>(selection);
 
-   cv::Point start = match_to.contour[start_idx];
-   cv::Point end = match_to.contour[end_idx];
+
 
    // Create mocked up edge
    Edge match_edge;
@@ -140,8 +177,15 @@ void test_pieces(void)
    should_match.types.push_back( Curve::indent );
 
 
-   }
+   Piece fake = piece_to_fake( match_to, start_idx, end_idx );
 
+   std::vector<size_t> infl_idx = find_inflections( fake.points );
+   fake.set_inflection( infl_idx );
+   fake.process();
+   fake.draw( 480 );
+   cv::waitKey(0);
+
+   }
 
 
 
