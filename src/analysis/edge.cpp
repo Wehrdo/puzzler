@@ -56,6 +56,32 @@ void Edge::rotate(Point that)
     transform(this->points, this->points, transformation);
 }
 
+// Takes a set of 2D points and fills a pre-allocated Nx6 array
+// such that the first 3 columns contain the x, y, z, coordinates of the points
+// and the last 3 columns contain the x, y, z coordinates of the normal vectors to the points
+void to_3d_set(const vector<Point>& points, Mat &out_mat) {
+    Mat last_pt(1, 3, CV_32F);
+    // Vector pointing directly up
+    Mat up_vec = (Mat_<float>(1, 3, CV_32F) << 0, 0, -1);
+    for (size_t i = 0; i < points.size(); ++i) {
+        // This point as a matrix
+        Mat p = (Mat_<float>(1, 3, CV_32F) << (float)points[i].x, (float)points[i].y, 0);
+        // Direction of the edge from the last vertex to this vertex
+        Mat dir = p - last_pt;
+        // Normal vertex, pointing outwards
+        Mat normal = dir.cross(up_vec);
+        normal = normal / norm(normal);
+        // Copy point to matrix
+        p.copyTo(out_mat.row(i).colRange(0, 3));
+        // Copy normal vector in
+        normal.copyTo(out_mat.row(i).colRange(3, 6));    
+
+        last_pt = p;
+    }
+    // Duplicate second vector's normal to first vector's normal
+    (out_mat.row(1).colRange(3, 6)).copyTo(out_mat.row(0).colRange(3, 6));
+}
+
 float Edge::compare(const Edge &that)
 {
     // How much to translate the points by. Moves "that" to the origin of "this"
@@ -67,32 +93,47 @@ float Edge::compare(const Edge &that)
     // Matrix to rotate "that" about its origin by the correct amount
     Mat rot_mat = getRotationMatrix2D(Point(0, 0), amt_to_rotate * RAD_TO_DEG, 1);
     // Matrix to translate points
-    double data[2][3] = {{1, 0, translate_amt.x}, {0, 1, translate_amt.y}};
+    double data[2][3] = {{1, 0, (double)translate_amt.x}, {0, 1, (double)translate_amt.y}};
     Mat trans_mat(2, 3, CV_64F, data);
 
     // Translate then rotate
     vector<Point> moved_pts;
     transform(that.points, moved_pts, trans_mat);
     transform(moved_pts, moved_pts, rot_mat);
+    
+    // Copy and reverse these points
+    vector<Point> static_pts(points.begin(), points.end());
+    reverse(static_pts.begin(), static_pts.end());
 
-    reverse(moved_pts.begin(), moved_pts.end());
+    Mat a6(static_pts.size(), 6, CV_32F);
+    Mat b6(moved_pts.size(), 6, CV_32F);
+    to_3d_set(static_pts, a6);
+    to_3d_set(moved_pts, b6);
 
-    Mat a = Mat(points, CV_32F);
-    Mat b = Mat(moved_pts, CV_32F);
-    Mat a3(a.size(), CV_MAKE_TYPE(a.type(), 3));
-    Mat b3(b.size(), CV_MAKE_TYPE(b.type(), 3));
-    int copy_method[4] = {0,0, 1,1};
-    mixChannels(&a, 1, &a3, 1, copy_method, 2);
-    mixChannels(&b, 1, &b3, 1, copy_method, 2);
+    cv::ppf_match_3d::ICP icp(100, 0.1, 2.5, 4);
+    double pose[16];
+    double error;
+    int failure = 0;
+    int failure = icp.registerModelToScene(b6, a6, error, pose);
+    if (failure) {
+        cout << "Failed to find pose" << endl;
+    }
+    Mat pose4(4, 4, CV_64F, pose);
     
 
+    Mat opt_tran(2, 3, CV_64F);
+    pose4.rowRange(0, 2).colRange(0, 2).copyTo(opt_tran.colRange(0, 2));
+    pose4.rowRange(0, 2).colRange(3, 4).copyTo(opt_tran.colRange(2, 3));
 
     // transform(moved_pts, moved_pts, opt_tran);
-    vector<Point> all_pts(a);
+    vector<Point> all_pts(static_pts);
     all_pts.insert(all_pts.end(), moved_pts.begin(), moved_pts.end());
     Mat moved_curve = draw_curve(all_pts, 480);
-    imshow("augh", moved_curve);
+    namedWindow("itsawindow");
+    imshow("itsawindow", moved_curve);
     waitKey(0);
-    // cout << "opt_tran = " << endl << opt_tran << endl;
+    cout << "Error = " << error << endl;
+    cout << "pose4 = " << endl << pose4 << endl;
+    cout << "opt_tran = " << endl << opt_tran << endl;
     return 0;
 }
