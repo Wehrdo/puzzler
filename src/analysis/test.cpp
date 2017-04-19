@@ -11,6 +11,55 @@
 #include <functional>
 #include <opencv2/opencv.hpp>
 
+std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
+   {
+   std::vector<Edge> to_return;
+   size_t num = match_to.types.size();
+
+   std::cout << "Looking for ";
+   for( size_t i = 0; i < num; i++ )
+      std::cout << match_to.types[i] << ", ";
+   std::cout << std::endl;
+
+   size_t piece_index = 0;
+   for( Piece piece : pieces )
+      {
+      std::cout << "Looking at piece: " << std::to_string(piece_index++) << std::endl;
+      bool to_add = true;
+      std::vector<Curve> potential;
+      for( size_t curve_index = 0; curve_index < piece.curves.size(); curve_index++ )
+         {
+         std::cout << "Checking curve: " << std::to_string( curve_index ) << std::endl;
+         potential.clear();
+         to_add = true;
+         size_t num_curves = piece.curves.size();
+
+         if( num_curves < num )
+            break;
+
+         for( size_t j = 0; j < num; j++ )
+            {
+            std::cout << "Looking for " << match_to.types[j] << " found " << piece.curves[(j+curve_index)%num_curves].type << std::endl;
+            potential.push_back( piece.curves[(j+curve_index)%num_curves]);
+            if( piece.curves[(j+curve_index)%num_curves].type != match_to.types[j] )
+               {
+               potential.pop_back();
+               to_add = false;
+               break;
+               }
+            }
+         if( to_add )
+            {
+            std::cout << "Found potential edge! Adding edge " << std::to_string(curve_index) << " from piece " << std::to_string(piece_index) << std::endl;
+            Edge new_edge(piece, potential );
+            to_return.push_back( new_edge );
+            }
+
+         }
+      }
+   return to_return;
+   }
+
 
 Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    {
@@ -54,9 +103,9 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
 
 
    // Find inflection points, process
-   std::vector<size_t> infl_idx = find_inflections( fake.points );
-   fake.set_inflection( infl_idx );
-   fake.process();
+   std::vector<size_t> infl_idx = find_inflections( to_return.points );
+   to_return.set_inflection( infl_idx );
+   to_return.process();
 
    return to_return;
 
@@ -135,17 +184,17 @@ void test_pieces(void)
    unsigned int i;
    for( i = 0; i < pieces.size(); i++ )
       {
-      Piece processing = pieces[i];
+      // Piece pieces[i] = pieces[i];
 
       // Find inflection points and process pieces
-      infl_indices = find_inflections(processing.points, ((M_PI / 180) * 40));
-      processing.set_inflection( infl_indices );
-      processing.process();
+      infl_indices = find_inflections(pieces[i].points, ((M_PI / 180) * 40));
+      pieces[i].set_inflection( infl_indices );
+      pieces[i].process();
 
-      auto straight_lines = find_straight_sides(processing.points, ((M_PI / 180) * 0.5));
+      auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
       // draw to matrix
-      cv::Mat output = draw_curve(processing.points, 480, infl_indices, processing.defect_index, straight_lines, true);
+      cv::Mat output = draw_curve(pieces[i].points, 480, infl_indices, pieces[i].defect_index, straight_lines, true);
 
 
       // Show to screen
@@ -157,9 +206,9 @@ void test_pieces(void)
 
       // Process the edge we are testing for
 
-      //processing.draw( 480 );
-      //std::cout << "Showing image " << i << std::endl;
-      //cv::waitKey(0);
+      // pieces[i].draw( 480 );
+      // std::cout << "Showing image " << i << std::endl;
+      // cv::waitKey(0);
       }
 
    // // Prompt user for image
@@ -170,8 +219,12 @@ void test_pieces(void)
    size_t end_idx = std::get<1>(selection);
 
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
-
-
+   fake.draw( 480 );
+   cv::waitKey( 0 );
+   Edge match_edge( fake, fake.curves );
+   std::vector<Edge> potential;
+   potential = find_to_compare( pieces, match_edge );
+   std::cout << "Found " << potential.size() << " edges to try." << std::endl;
 
    // // Create mocked up edge
    // Edge match_edge;
@@ -195,7 +248,7 @@ void test_pieces(void)
 
 
 
-   match_edge.compare(should_match);
+   //match_edge.compare(should_match);
    }
 
 int main()

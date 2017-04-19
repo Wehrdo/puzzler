@@ -17,6 +17,7 @@ class Edge
       Edge( void );
       Edge( Piece piece, std::vector<Curve> curves );
 
+
       void translate( void );
 
       void rotate( cv::Point that );

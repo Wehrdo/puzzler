@@ -4,11 +4,21 @@
 
 #include <cstdio>
 
+// Sort the contours, so in order around piece
+bool compare_curve( Curve c1, Curve c2 )
+   {
+   return c1.start < c2.start;
+   }
+
+
 void Piece::process( void )
    {
    process_cvx_hull();
    find_indents();
    find_outdents();
+
+   // Sort so that are in order of apearance
+   std::sort( curves.begin(), curves.end(), compare_curve );
 
    }
 
@@ -182,7 +192,7 @@ void Piece::find_outdents( void )
       float C = -1.0*(A*first.x) - (B*first.y);
 
       // Iterate until find first hull pt between first and second
-      unsigned int hull_idx = 0;
+      size_t hull_idx = 0;
       wrapped = false;
       while( hull_index[hull_idx] < inflection_index[ first_infl ] && !wrapped)
          {
@@ -362,6 +372,7 @@ void Piece::draw( unsigned int width )
 
       }
 
+   int count = 0;
    for( Curve curve : curves )
       {
       cv::Point centre = convert_coord( curve.origin );
@@ -378,10 +389,13 @@ void Piece::draw( unsigned int width )
          {
          bool wrapped;
          cv::circle( out_img, convert_coord(contour[idx]), 5, color );
+
          idx = next_index( contour, idx, wrapped );
          }
 
       cv::circle(out_img, centre, 20, color );
+      cv::putText( out_img, std::to_string(count++), centre + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, white );
+
       }
 
    cv::imshow( name, out_img );

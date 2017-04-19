@@ -16,7 +16,7 @@ class Piece
       std::vector<cv::Point> contour;
       std::vector<int> hull_index;
       std::vector<size_t> defect_index;
-      std::vector<size_t> inflection_index; 
+      std::vector<size_t> inflection_index;
       std::vector<Curve> curves;
 
       // Constructors

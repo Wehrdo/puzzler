@@ -13,13 +13,13 @@ class Curve
       };
 
       cv::Point origin;
-      int start;
-      int end;
+      size_t start;
+      size_t end;
       curve_type type;
 
 
 
-      Curve( int start, int end, cv::Point origin, curve_type type )
+      Curve( size_t start, size_t end, cv::Point origin, curve_type type )
          {
          this->start = start;
          this->end = end;

@@ -16,9 +16,19 @@ Edge::Edge(Piece piece, vector<Curve> curves)
     if (curves.size() >= 1)
         this->handle = curves[curves.size() - 1].origin;
 
-    this->points = vector<Point>(
-        &(piece.contour[curves[0].start]),
-        &(piece.contour[curves[curves.size() - 1].end]));
+    size_t idx = curves[0].start;
+    do
+       {
+       if( idx == piece.contour.size() )
+          idx = 0;
+       this->points.push_back(piece.contour[idx]);
+       idx++;
+       }
+    while(idx != curves[curves.size()-1].end);
+
+    // this->points = vector<Point>(
+    //     &(piece.contour[curves[0].start]),
+    //     &(piece.contour[curves[curves.size() - 1].end]));
 
     for (Curve curve : curves)
         this->types.push_back(curve.type);
@@ -94,7 +104,7 @@ float Edge::compare(const Edge &that)
     waitKey(0);
     imshow("augh", draw_curve(b, 480));
     waitKey(0);
-    
+
     Mat opt_tran = estimateRigidTransform(a, b, false);
     cout << "opt_tran = " << endl << opt_tran << endl;
     return 0;
