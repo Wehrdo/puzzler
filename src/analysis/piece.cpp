@@ -134,7 +134,7 @@ void Piece::find_indents( void )
       prv = contour[prv_inf];
       nxt = contour[nxt_inf];
 
-      std::cout << "Considering inflection points: " << prv_inf << nxt_inf << std::endl;
+      std::cout << "Considering inflection points: " << prv_inf << ", " <<  nxt_inf << std::endl;
 
       bool intersect = intersect_lines( prv_slp, nxt_slp, prv, nxt, ins_pt );
       std::cout << "Lines " << (intersect?"do ":"do not ") << "intersect" << std::endl;
@@ -155,6 +155,21 @@ void Piece::find_indents( void )
             }
          // Find the center of indent
          cv::RotatedRect best_fit = fitEllipse( curve );
+
+         cv::Point2f circ;
+         float radius;
+         cv::minEnclosingCircle( curve, circ, radius );
+
+         // compare area of circle with area of rotated rect
+         float circ_area = M_PI*pow(radius, 2);
+         float rect_area = best_fit.size.area();
+         float ratio_area = circ_area / rect_area;
+         std::cout << "circle area: " << circ_area << std::endl;
+         std::cout << "rect area: " << rect_area << std::endl;
+         std:: cout << "ratio of areas " << ratio_area << std::endl;
+
+         if( ratio_area < 0.8 || ratio_area > 1.5 )
+            continue;
 
          bool tmp;
 

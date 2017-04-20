@@ -77,7 +77,7 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    cv::Point2f temp_pt;
 
    // length of corner we are creating
-   float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2);
+   float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2) / (3.0/4.0);
 
    // Starting point, along X axis with offset
    corner.x = start.x + length;
@@ -98,13 +98,13 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
 
    Piece to_return;
 
-   // Copy over selected points
-   to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
-   to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
-
    // Add new point
    to_return.contour.push_back( transformed[0] );
    to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
+
+   // Copy over selected points
+   to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
+   to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
 
    // Flip order, because we are esentially flipping piece inside out
    std::reverse(to_return.contour.begin(), to_return.contour.end() );
@@ -174,7 +174,7 @@ void test_pieces(void)
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
    // Pieces matching to
-   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
+   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial.png", 1 );
    // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
