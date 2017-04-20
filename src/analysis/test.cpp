@@ -214,6 +214,7 @@ void test_pieces(void)
       // pieces[i].draw( 480 );
       // std::cout << "Showing image " << i << std::endl;
       // cv::waitKey(0);
+
       }
 
    // // Prompt user for image
