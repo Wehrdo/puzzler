@@ -229,7 +229,7 @@ void test_pieces(void)
    match_edge.draw();
    for( Edge edge : potential )
       {
-      edge.draw();
+      match_edge.compare(edge);
       }
 
    //match_edge.compare(should_match);
