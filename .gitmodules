@@ -2,3 +2,6 @@
 	path = src/opencv
 	url = https://github.com/opencv/opencv
 	ignore = dirty
+[submodule "src/opencv_contrib"]
+	path = src/opencv_contrib
+	url = https://github.com/opencv/opencv_contrib
