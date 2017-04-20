@@ -162,10 +162,10 @@ void test_pieces(void)
 
    // Pieces to process
    std::vector<cv::Mat> images;
-   images.push_back( cv::imread "../../images/rows/row1_shrunk.png", 1 );
-   images.push_back( cv::imread "../../images/rows/row2_shrunk.png", 1 );
-   images.push_back( cv::imread "../../images/rows/row3_shrunk.png", 1 );
-   images.push_back( cv::imread "../../images/rows/row4_shrunk.png", 1 );
+   images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
+   images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
+   images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
+   images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
 
    for( cv::Mat image : images )
       {
