@@ -74,19 +74,21 @@ float Edge::compare(const Edge &that)
     double that_angle = atan2(that.origin.y - that.handle.y, that.handle.x - that.origin.x);
     double amt_to_rotate = this_angle - that_angle;
     // Matrix to rotate "that" about its origin by the correct amount
-    Mat rot_mat = getRotationMatrix2D(Point(0, 0), amt_to_rotate * RAD_TO_DEG, 1);
+    Mat rot_mat = getRotationMatrix2D(origin, amt_to_rotate * RAD_TO_DEG, 1);
     // Matrix to translate points
     double data[2][3] = {{1, 0, (double)translate_amt.x}, {0, 1, (double)translate_amt.y}};
     Mat trans_mat(2, 3, CV_64F, data);
 
     // Translate then rotate
     vector<Point> moved_pts;
+    // vector<Point> moved_pts(that.points.begin(), that.points.end());
     transform(that.points, moved_pts, trans_mat);
+    cout << "Rotating by " << amt_to_rotate * RAD_TO_DEG << endl;
     transform(moved_pts, moved_pts, rot_mat);
 
     // Copy and reverse these points
     vector<Point> static_pts(points.begin(), points.end());
-    reverse(static_pts.begin(), static_pts.end());
+    // reverse(static_pts.begin(), static_pts.end());
 
     Mat a6(static_pts.size(), 6, CV_32F);
     Mat b6(moved_pts.size(), 6, CV_32F);
@@ -97,27 +99,32 @@ float Edge::compare(const Edge &that)
     double pose[16];
     double error;
     int failure = 0;
-    failure = icp.registerModelToScene(b6, a6, error, pose);
+    try {
+        failure = icp.registerModelToScene(b6, a6, error, pose);
+    }
+    catch (...) {
+        cout << "Exception when running registerModelToScene" << endl;
+        return INFINITY;
+    }
     if (failure) {
         cout << "Failed to find pose" << endl;
     }
     Mat pose4(4, 4, CV_64F, pose);
-
-
+    // Copy 4x4 matrix into a 2x3 matrix
     Mat opt_tran(2, 3, CV_64F);
     pose4.rowRange(0, 2).colRange(0, 2).copyTo(opt_tran.colRange(0, 2));
     pose4.rowRange(0, 2).colRange(3, 4).copyTo(opt_tran.colRange(2, 3));
 
-    // transform(moved_pts, moved_pts, opt_tran);
+    transform(moved_pts, moved_pts, opt_tran);
     vector<Point> all_pts(static_pts);
     all_pts.insert(all_pts.end(), moved_pts.begin(), moved_pts.end());
     Mat moved_curve = draw_curve(all_pts, 480);
-    namedWindow("itsawindow");
-    imshow("itsawindow", moved_curve);
-    waitKey(0);
 
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
-    return 0;
+    namedWindow("itsawindow");
+    imshow("itsawindow", moved_curve);
+    waitKey(0);
+    return error;
 }
