@@ -74,6 +74,7 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    cv::Point2f start = input.contour[start_idx];
    cv::Point2f end = input.contour[end_idx];
    cv::Point2f corner;
+   cv::Point2f temp_pt;
 
    // length of corner we are creating
    float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2);
@@ -82,17 +83,14 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    corner.x = start.x + length;
    corner.y = start.y;
 
-   // Equation of line
-   float slope = (end.y - start.y)/(end.x - start.x);
-   float inter = start.y - slope*start.x;
-
    // rotate 45 degrees from existing line
    float angle = -45.0;
-   float y = slope*corner.x + inter;
-   float side_part = sqrt( pow(start.x - corner.x, 2) + pow(start.y - y, 2));
 
+   temp_pt = cv::Point2f(end);
+   temp_pt.x += 0-start.x; temp_pt.y += 0-start.y;
+
+   angle += -1*atan2(temp_pt.y, temp_pt.x)*180.0/M_PI;
    // rotate be amount existing line is from normal
-   angle -= acos(length/side_part)*180.0/M_PI;
    cv::Mat trans = cv::getRotationMatrix2D( start, angle, 1 );
    std::vector<cv::Point> to_transform(1, corner );
    std::vector<cv::Point> transformed;
@@ -162,6 +160,7 @@ void test_pieces(void)
 
    // Pieces to process
    std::vector<cv::Mat> images;
+   //images.push_back( cv::imread("../../images/camera/cam_pieces.png", 1 ));
    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
@@ -175,7 +174,8 @@ void test_pieces(void)
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
    // Pieces matching to
-   cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
+   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
+   // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
 
