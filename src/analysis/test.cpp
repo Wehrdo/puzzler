@@ -97,9 +97,14 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
    to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
 
+
    // Add new point
    to_return.contour.push_back( transformed[0] );
    to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
+
+      // Flip order, because we are esentially flipping piece inside out
+   std::reverse(to_return.contour.begin(), to_return.contour.end() );
+   std::reverse(to_return.points.begin(), to_return.points.end() );
 
 
    // Find inflection points, process
@@ -225,6 +230,12 @@ void test_pieces(void)
    std::vector<Edge> potential;
    potential = find_to_compare( pieces, match_edge );
    std::cout << "Found " << potential.size() << " edges to try." << std::endl;
+
+   match_edge.draw();
+   for( Edge edge : potential )
+      {
+      edge.draw();
+      }
 
    // // Create mocked up edge
    // Edge match_edge;

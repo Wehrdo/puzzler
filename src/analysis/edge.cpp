@@ -34,6 +34,14 @@ Edge::Edge(Piece piece, vector<Curve> curves)
         this->types.push_back(curve.type);
 }
 
+void Edge::draw(void)
+   {
+   cv::namedWindow("Edge");
+   cv::imshow("augh", draw_curve(points, 480));
+   cv::waitKey(0);
+
+   }
+
 void Edge::translate(void)
 {
     // Translate wrt origin
