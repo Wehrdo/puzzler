@@ -21,29 +21,37 @@ std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
       std::cout << match_to.types[i] << ", ";
    std::cout << std::endl;
 
+   // For ever piece
    size_t piece_index = 0;
    for( Piece piece : pieces )
       {
       std::cout << "Looking at piece: " << std::to_string(piece_index++) << std::endl;
+
+      // Starting at every curve in piece
       bool to_add = true;
       std::vector<Curve> potential;
       for( size_t curve_index = 0; curve_index < piece.curves.size(); curve_index++ )
          {
          std::cout << "Checking curve: " << std::to_string( curve_index ) << std::endl;
+
          potential.clear();
          to_add = true;
          size_t num_curves = piece.curves.size();
 
+         // Stop if we don't have enough curves
          if( num_curves < num )
             break;
 
+         // Check needed number of curves in advance
          for( size_t j = 0; j < num; j++ )
             {
             std::cout << "Looking for " << match_to.types[j] << " found " << piece.curves[(j+curve_index)%num_curves].type << std::endl;
+
+            // Prematurely add
             potential.push_back( piece.curves[(j+curve_index)%num_curves]);
             if( piece.curves[(j+curve_index)%num_curves].type != match_to.types[j] )
                {
-               potential.pop_back();
+               // Required sequence broken
                to_add = false;
                break;
                }
@@ -54,7 +62,6 @@ std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
             Edge new_edge(piece, potential );
             to_return.push_back( new_edge );
             }
-
          }
       }
    return to_return;
@@ -97,15 +104,13 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
    to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
 
-
    // Add new point
    to_return.contour.push_back( transformed[0] );
    to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
 
-      // Flip order, because we are esentially flipping piece inside out
+   // Flip order, because we are esentially flipping piece inside out
    std::reverse(to_return.contour.begin(), to_return.contour.end() );
    std::reverse(to_return.points.begin(), to_return.points.end() );
-
 
    // Find inflection points, process
    std::vector<size_t> infl_idx = find_inflections( to_return.points );
@@ -113,7 +118,6 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    to_return.process();
 
    return to_return;
-
    }
 
 std::vector<Vec2d> gen_curve(int N, double start, double end, std::function<double(double)> func) {
@@ -157,60 +161,42 @@ void test_pieces(void)
    std::vector<Piece> pieces;
 
    // Pieces to process
-   cv::Mat row1 = cv::imread( "../../images/rows/row1_shrunk.png", 1 );
-   cv::Mat row2 = cv::imread( "../../images/rows/row2_shrunk.png", 1 );
-   cv::Mat row3 = cv::imread( "../../images/rows/row3_shrunk.png", 1 );
-   cv::Mat row4 = cv::imread( "../../images/rows/row4_shrunk.png", 1 );
+   std::vector<cv::Mat> images;
+   images.push_back( cv::imread "../../images/rows/row1_shrunk.png", 1 );
+   images.push_back( cv::imread "../../images/rows/row2_shrunk.png", 1 );
+   images.push_back( cv::imread "../../images/rows/row3_shrunk.png", 1 );
+   images.push_back( cv::imread "../../images/rows/row4_shrunk.png", 1 );
+
+   for( cv::Mat image : images )
+      {
+      std::vector<Piece> found = find_pieces( image );
+      pieces.insert( pieces.end(), found.begin(), found.end() );
+      }
+   std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
    // Pieces matching to
    cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
-
-   // Find pieces
-   std::vector<Piece> found = find_pieces( row1 );
-   pieces.insert( pieces.end(), found.begin(), found.end() );
-   found = find_pieces( row2 );
-   pieces.insert( pieces.end(), found.begin(), found.end() );
-   found = find_pieces( row3 );
-   pieces.insert( pieces.end(), found.begin(), found.end() );
-   found = find_pieces( row4 );
-   pieces.insert( pieces.end(), found.begin(), found.end() );
-
-   // Take in image that we are matching to
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
 
-   std::cout << "Found " << pieces.size() << " pieces." << std::endl;
+   // Create GUI object
    PuzzleGUI gui("User GUI");
+
+   // Hold found inflection points
    std::vector<std::size_t> infl_indices;
    std::vector<Vec2d> infl_points;
 
-
-   std::string win_name = "Piece ";
-   unsigned int i;
-   for( i = 0; i < pieces.size(); i++ )
+   for( size_t i = 0; i < pieces.size(); i++ )
       {
-      // Piece pieces[i] = pieces[i];
 
       // Find inflection points and process pieces
       infl_indices = find_inflections(pieces[i].points, ((M_PI / 180) * 40));
       pieces[i].set_inflection( infl_indices );
       pieces[i].process();
 
-      auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
+      // auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
-      // draw to matrix
-      cv::Mat output = draw_curve(pieces[i].points, 480, infl_indices, pieces[i].defect_index, straight_lines, true);
-
-
-      // Show to screen
-      // std::string name = win_name + std::to_string(i);
-      // cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
-      // cv::imshow(name, output);
-      // cv::waitKey(0);
-      // cv::destroyWindow(name );@
-
-      // Process the edge we are testing for
-
+      // Draw processed pieces to screen
       // pieces[i].draw( 480 );
       // std::cout << "Showing image " << i << std::endl;
       // cv::waitKey(0);
@@ -223,49 +209,33 @@ void test_pieces(void)
    size_t start_idx = std::get<0>(selection);
    size_t end_idx = std::get<1>(selection);
 
+   // Create "fake piece" from selection
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
+
+   // Show fake piece to screen
    fake.draw( 480 );
    cv::waitKey( 0 );
+
+   // Create edge from faked piece
    Edge match_edge( fake, fake.curves );
+
+   // Find edges from remaining pieces that could match
    std::vector<Edge> potential;
    potential = find_to_compare( pieces, match_edge );
    std::cout << "Found " << potential.size() << " edges to try." << std::endl;
 
+   // Show edge we are looking for and edges found
    match_edge.draw();
    for( Edge edge : potential )
       {
       edge.draw();
       }
 
-   // // Create mocked up edge
-   // Edge match_edge;
-   // match_edge.origin = cv::Point( 389.761, 707.396 );
-   // match_edge.handle = cv::Point( 541.796, 1003.53 );
-   // match_edge.points = std::vector<cv::Point>(&(match_to.contour[start_idx]), &(match_to.contour[end_idx]) );
-   // match_edge.types.push_back( Curve::outdent );
-   // match_edge.types.push_back( Curve::indent );
-
-   // Edge should_match;
-   // should_match.origin = cv::Point( 880.307, 1970.96 );
-   // should_match.handle = cv::Point( 995.534, 2282.31 );
-   // std::vector<cv::Point> to_add_1( &(pieces[6].contour[65]), &(pieces[6].contour[110]));
-   // std::vector<cv::Point> to_add_2( &(pieces[6].contour[0]), &(pieces[6].contour[7]));
-   // std::vector<cv::Point> to_add;
-   // to_add.insert(to_add.end(), to_add_1.begin(), to_add_1.end() );
-   // to_add.insert(to_add.end(), to_add_2.begin(), to_add_2.end() );
-   // should_match.points = to_add;
-   // should_match.types.push_back( Curve::outdent );
-   // should_match.types.push_back( Curve::indent );
-
-
-
    //match_edge.compare(should_match);
    }
 
 int main()
    {
-   cv::Mat img = cv::imread( "../../images/rows/row1.png", 1 );
-
    test_pieces();
    return 0;
 };

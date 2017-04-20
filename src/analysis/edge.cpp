@@ -27,10 +27,6 @@ Edge::Edge(Piece piece, vector<Curve> curves)
        }
     while(idx != curves[curves.size()-1].end);
 
-    // this->points = vector<Point>(
-    //     &(piece.contour[curves[0].start]),
-    //     &(piece.contour[curves[curves.size() - 1].end]));
-
     for (Curve curve : curves)
         this->types.push_back(curve.type);
 }
@@ -38,41 +34,10 @@ Edge::Edge(Piece piece, vector<Curve> curves)
 void Edge::draw(void)
    {
    cv::namedWindow("Edge");
-   cv::imshow("augh", draw_curve(points, 480));
+   cv::imshow("Edge", draw_curve(points, 480));
    cv::waitKey(0);
 
    }
-
-void Edge::translate(void)
-{
-    // Translate wrt origin
-    float delta_x = 0 - origin.x;
-    float delta_y = 0 - origin.y;
-    for (Point pt : points)
-    {
-        pt.x += delta_x;
-        pt.y += delta_y;
-    }
-    handle.x += delta_x;
-    handle.y += delta_y;
-}
-
-void Edge::rotate(Point that)
-{
-    // Rotate wrt point and handle
-
-    float angle = this->handle.dot(that);
-
-    float len1 = sqrt(this->handle.x * this->handle.x + this->handle.y * this->handle.y);
-    float len2 = sqrt(that.x * that.x + that.y * that.y);
-
-    float a = this->handle.dot(that) / (len1 * len2);
-
-    angle = (a >= 0 ? 1.0 : -1.0) * acos(a);
-
-    Mat transformation = getRotationMatrix2D(this->origin, angle, 1);
-    transform(this->points, this->points, transformation);
-}
 
 // Takes a set of 2D points and fills a pre-allocated Nx6 array
 // such that the first 3 columns contain the x, y, z, coordinates of the points
@@ -92,7 +57,7 @@ void to_3d_set(const vector<Point>& points, Mat &out_mat) {
         // Copy point to matrix
         p.copyTo(out_mat.row(i).colRange(0, 3));
         // Copy normal vector in
-        normal.copyTo(out_mat.row(i).colRange(3, 6));    
+        normal.copyTo(out_mat.row(i).colRange(3, 6));
 
         last_pt = p;
     }
@@ -118,7 +83,7 @@ float Edge::compare(const Edge &that)
     vector<Point> moved_pts;
     transform(that.points, moved_pts, trans_mat);
     transform(moved_pts, moved_pts, rot_mat);
-    
+
     // Copy and reverse these points
     vector<Point> static_pts(points.begin(), points.end());
     reverse(static_pts.begin(), static_pts.end());
@@ -137,7 +102,7 @@ float Edge::compare(const Edge &that)
         cout << "Failed to find pose" << endl;
     }
     Mat pose4(4, 4, CV_64F, pose);
-    
+
 
     Mat opt_tran(2, 3, CV_64F);
     pose4.rowRange(0, 2).colRange(0, 2).copyTo(opt_tran.colRange(0, 2));

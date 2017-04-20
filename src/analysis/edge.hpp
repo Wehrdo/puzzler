@@ -19,13 +19,8 @@ class Edge
 
       void draw( void );
 
-      void translate( void );
-
-      void rotate( cv::Point that );
-
       // Compare with another edge
       float compare(const Edge& that );
-
    };
 
 #endif /* EDGE_H */

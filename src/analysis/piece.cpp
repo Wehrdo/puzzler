@@ -10,7 +10,6 @@ bool compare_curve( Curve c1, Curve c2 )
    return c1.start < c2.start;
    }
 
-
 void Piece::process( void )
    {
    process_cvx_hull();
@@ -19,7 +18,6 @@ void Piece::process( void )
 
    // Sort so that are in order of apearance
    std::sort( curves.begin(), curves.end(), compare_curve );
-
    }
 
 void Piece::set_inflection( std::vector<std::size_t> infl )
@@ -124,7 +122,6 @@ void Piece::find_indents( void )
          inf_idx = next_index( inflection_index, inf_idx, wrapped );
          }
 
-
       // Find inflection points before and after maxima
       unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
       unsigned int nxt_inf = inflection_index[inf_idx];
@@ -181,7 +178,6 @@ void Piece::find_outdents( void )
       unsigned int second_infl = next_index( inflection_index, first_infl, wrapped );
 
       std::cout << "ifnl points: first, " << inflection_index[first_infl] << " second, " << inflection_index[second_infl] << std::endl;
-
 
       cv::Point first = contour[ inflection_index[ first_infl ] ];
       cv::Point second = contour[ inflection_index[ second_infl ] ];
@@ -248,11 +244,9 @@ void Piece::find_outdents( void )
 
       // do they intersect?
       bool intersect = intersect_lines( first_slp, second_slp, first, second, ins_pt );
-
       int within = pointPolygonTest( contour, ins_pt, false );
 
       std::cout << "Lines do " << (intersect?"":"not ") << "intersect" << std::endl;
-
       std::cout << "Lines intersect at " << ins_pt << std::endl;
 
       // If intersect within piece
@@ -269,7 +263,6 @@ void Piece::find_outdents( void )
             std::cout << "Comparing " << past_curve.start << " and " << (inflection_index[second_infl] ) << std::endl;
             std::cout << "Comparing " << past_curve.end << " and " << (inflection_index[first_infl] ) << std::endl;
 
-
             if( past_curve.start == (inflection_index[second_infl]) ||
                 past_curve.end == inflection_index[first_infl] )
                fake_curve = true;
@@ -277,7 +270,6 @@ void Piece::find_outdents( void )
 
          if( fake_curve )
             continue;
-
 
          // Find points that characterize curve
          unsigned int start = inflection_index[first_infl];
@@ -369,7 +361,6 @@ void Piece::draw( unsigned int width )
       cv::Point infl_pt = convert_coord( contour[idx] );
       cv::circle(out_img, infl_pt, 10, white);
       cv::putText( out_img, std::to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, white );
-
       }
 
    int count = 0;
@@ -377,7 +368,6 @@ void Piece::draw( unsigned int width )
       {
       cv::Point centre = convert_coord( curve.origin );
       cv::Scalar color;
-
 
       if( curve.type == Curve::indent )
          color = blue;
@@ -399,5 +389,4 @@ void Piece::draw( unsigned int width )
       }
 
    cv::imshow( name, out_img );
-
    }
