@@ -132,7 +132,7 @@ float Edge::compare(const Edge &that)
     double pose[16];
     double error;
     int failure = 0;
-    int failure = icp.registerModelToScene(b6, a6, error, pose);
+    failure = icp.registerModelToScene(b6, a6, error, pose);
     if (failure) {
         cout << "Failed to find pose" << endl;
     }
@@ -151,7 +151,6 @@ float Edge::compare(const Edge &that)
     imshow("itsawindow", moved_curve);
     waitKey(0);
 
-    Mat opt_tran = estimateRigidTransform(a, b, false);
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
