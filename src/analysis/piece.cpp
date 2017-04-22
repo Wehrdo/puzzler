@@ -171,8 +171,6 @@ void Piece::find_indents( void )
          if( ratio_area < 0.8 || ratio_area > 1.5 )
             continue;
 
-         bool tmp;
-
          Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::indent );
          curves.push_back( to_add );
 
@@ -197,11 +195,6 @@ void Piece::find_outdents( void )
       cv::Point first = contour[ inflection_index[ first_infl ] ];
       cv::Point second = contour[ inflection_index[ second_infl ] ];
 
-      // Find the equation of the line between them
-      float A = -1.0 * ( second.y - first.y );
-      float B = second.x - first.x;
-      float C = -1.0*(A*first.x) - (B*first.y);
-
       // Iterate until find first hull pt between first and second
       size_t hull_idx = 0;
       wrapped = false;
@@ -210,7 +203,6 @@ void Piece::find_outdents( void )
          hull_idx = next_index( hull_index, hull_idx, wrapped );
          }
 
-      std::cout << "convex point: " << hull_index[hull_idx] << std::endl;
       if(
          (inflection_index[first_infl] < inflection_index[second_infl] &&
           (hull_index[hull_idx] >= inflection_index[second_infl] ||
@@ -226,30 +218,6 @@ void Piece::find_outdents( void )
          {
          std::cout << "No convex between these infl pts" << std::endl;
          continue;
-         }
-
-      // Find furthest pt between first and second from line
-      wrapped = false;
-      float max_distance = 0.0;
-      cv::Point max_pt;
-      while( (inflection_index[second_infl] > inflection_index[first_infl] &&
-              hull_index[hull_idx] < inflection_index[ second_infl ] &&
-                !wrapped )
-             || (inflection_index[second_infl] < inflection_index[first_infl] &&
-                 ( hull_index[hull_idx] < inflection_index[second_infl] ||
-                   hull_index[hull_idx] > inflection_index[first_infl] )
-                )
-         )
-         {
-
-         cv::Point pt = contour[hull_index[hull_idx]];
-         float distance = abs( A*pt.x + B*pt.y + C ) / sqrt( pow(A, 2) + pow(B, 2) );
-         if( distance > max_distance )
-            {
-            max_pt = pt;
-            max_distance = distance;
-            }
-         hull_idx = next_index( hull_index, hull_idx, wrapped );
          }
 
       // Calculate tangent lines
@@ -274,10 +242,6 @@ void Piece::find_outdents( void )
          bool fake_curve = false;
          for( Curve past_curve : curves )
             {
-
-            std::cout << "Comparing " << past_curve.start << " and " << (inflection_index[second_infl] ) << std::endl;
-            std::cout << "Comparing " << past_curve.end << " and " << (inflection_index[first_infl] ) << std::endl;
-
             if( past_curve.start == (inflection_index[second_infl]) ||
                 past_curve.end == inflection_index[first_infl] )
                fake_curve = true;
@@ -287,7 +251,7 @@ void Piece::find_outdents( void )
             continue;
 
          // Find points that characterize curve
-         unsigned int start = inflection_index[first_infl];
+         size_t start = inflection_index[first_infl];
          std::vector<cv::Point> curve;
          wrapped = false;
          while( start != (inflection_index[second_infl]+1) )
@@ -319,7 +283,7 @@ void Piece::find_outdents( void )
          curves.push_back(to_add);
 
          std::cout << "Found a curve! We've found " << curves.size() << " so far." << std::endl;
-         std::cout << "coords: first, max, second, centre: " << first << second << max_pt << best_fit.center << std::endl;
+         std::cout << "coords: first, second, centre: " << first << second << best_fit.center << std::endl;
          }
       }
    }

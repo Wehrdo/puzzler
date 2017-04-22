@@ -174,7 +174,7 @@ void test_pieces(void)
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
 
    // Pieces matching to
-   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial.png", 1 );
+   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
    // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
@@ -197,9 +197,9 @@ void test_pieces(void)
       // auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
       // Draw processed pieces to screen
-      // pieces[i].draw( 480 );
-      // std::cout << "Showing image " << i << std::endl;
-      // cv::waitKey(0);
+      pieces[i].draw( 480 );
+      std::cout << "Showing image " << i << std::endl;
+      while(cv::waitKey(30) != ' ' );
 
       }
 
@@ -215,7 +215,7 @@ void test_pieces(void)
 
    // Show fake piece to screen
    fake.draw( 480 );
-   cv::waitKey( 0 );
+   while(cv::waitKey(30) != ' ' );
 
    // Create edge from faked piece
    Edge match_edge( fake, fake.curves );
