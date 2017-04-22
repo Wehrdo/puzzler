@@ -57,6 +57,8 @@ std::vector<Piece> find_pieces( cv::Mat img )
    double threshold = 10000.0;
    double size_factor = 2.0;
 
+   cv::Mat original_image;
+   img.copyTo(original_image);
    // convert to greyscale
    cvtColor( img, img, CV_BGR2GRAY );
    img = img > 100;
@@ -105,6 +107,7 @@ std::vector<Piece> find_pieces( cv::Mat img )
       if( contourArea(contours[i]) < (average_size*size_factor) )
          {
          Piece to_add;
+         to_add.raw_image = original_image;
 
          cv::approxPolyDP(contours[i], to_add.contour, 1, true );
          unsigned int j;
