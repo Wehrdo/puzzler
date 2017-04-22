@@ -8,43 +8,43 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 class Piece
-   {
-   public:
+{
+  public:
+    // Member variables
+    std::vector<Vec2d> points;
+    std::vector<cv::Point> contour;
+    std::vector<int> hull_index;
+    std::vector<size_t> defect_index;
+    std::vector<size_t> inflection_index;
+    std::vector<Curve> curves;
+    // Index of the original input this piece belongs to
+    cv::Mat raw_image;
 
-      // Member variables
-      std::vector<Vec2d> points;
-      std::vector<cv::Point> contour;
-      std::vector<int> hull_index;
-      std::vector<size_t> defect_index;
-      std::vector<size_t> inflection_index;
-      std::vector<Curve> curves;
+    // Constructors
+    Piece()
+    {
+    }
 
-      // Constructors
-      Piece()
-         {
+    Piece(std::vector<Vec2d> points, cv::Mat img)
+    {
+        this->points = points;
+        this->raw_image = img;
+    }
 
-         }
+    // Member functions
+    void process_cvx_hull();
 
-      Piece( std::vector<Vec2d> points )
-         {
-         this->points = points;
+    //TODO: Move inflection point calc here
+    //TODO: Move draw function here
 
-         }
-
-      // Member functions
-      void process_cvx_hull();
-
-      //TODO: Move inflection point calc here
-      //TODO: Move draw function here
-
-      void process( void );
-      void set_inflection( std::vector<std::size_t> infl );
-      void find_indents( void );
-      void find_outdents( void );
-      void find_outdents_old( void );
-      void draw( unsigned int width );
-   };
-
+    void process(void);
+    void set_inflection(std::vector<std::size_t> infl);
+    void find_indents(void);
+    void find_outdents(void);
+    void find_outdents_old(void);
+    void draw(unsigned int width);
+    void draw(unsigned int width, bool with_image);
+};
 
 // Inflection point code here?
 

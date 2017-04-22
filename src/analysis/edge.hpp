@@ -13,6 +13,7 @@ class Edge
       cv::Point handle;
       std::vector<cv::Point> points;
       std::vector<Curve::curve_type> types;
+      Piece owner_piece;
 
       Edge( void );
       Edge( Piece piece, std::vector<Curve> curves );

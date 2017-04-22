@@ -13,6 +13,7 @@ Edge::Edge() {}
 Edge::Edge(Piece piece, vector<Curve> curves)
 {
     this->origin = curves[0].origin;
+    this->owner_piece = piece;
 
     if (curves.size() >= 1)
         this->handle = curves[curves.size() - 1].origin;
@@ -123,8 +124,8 @@ float Edge::compare(const Edge &that)
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
-    namedWindow("itsawindow");
-    imshow("itsawindow", moved_curve);
-    waitKey(0);
+    // namedWindow("itsawindow");
+    // imshow("itsawindow", moved_curve);
+    // waitKey(0);
     return error;
 }

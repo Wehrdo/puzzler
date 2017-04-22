@@ -289,7 +289,11 @@ void Piece::find_outdents( void )
    }
 
 
-void Piece::draw( unsigned int width )
+void Piece::draw( unsigned int width ) {
+    draw(width, false);
+}
+
+void Piece::draw( unsigned int width, bool with_image )
    {
    std::string name = "Piece info";
    cv::namedWindow( name );
@@ -314,6 +318,14 @@ void Piece::draw( unsigned int width )
 
    // Create image matrix with dimensions to fill width, and proportional height
    cv::Mat out_img(height, width, CV_8UC3, cv::Scalar(0));
+   if (with_image) {
+       cv::Mat scaled_img;
+       int max_y_orig = raw_image.rows - min_y.y;
+       int min_y_orig = raw_image.rows - max_y.y;
+       cv::resize(raw_image.rowRange(min_y.y, max_y.y).colRange(min_x.x, max_x.x), out_img, cv::Size(width, height));
+       // Flip vertically
+       cv::flip(out_img, out_img, 0);
+   }
    cv::Scalar white = cv::Scalar(255, 255, 255);
    cv::Scalar red = cv::Scalar(0, 0, 255);
    cv::Scalar blue = cv::Scalar(255, 80, 80);

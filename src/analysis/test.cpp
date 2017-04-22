@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <cmath>
 #include <functional>
+#include <utility>
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 
 std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
@@ -160,14 +162,13 @@ void test_pieces(void)
 
    // Pieces to process
    std::vector<cv::Mat> images;
-   //images.push_back( cv::imread("../../images/camera/cam_pieces.png", 1 ));
-   images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
-   images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
-   images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
-   images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
-
-   for( cv::Mat image : images )
-      {
+   images.push_back( cv::imread("../../images/camera/cam_pieces.png", 1 ));
+//    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
+//    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
+//    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
+//    images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
+    
+    for( cv::Mat image : images ) {
       std::vector<Piece> found = find_pieces( image );
       pieces.insert( pieces.end(), found.begin(), found.end() );
       }
@@ -227,10 +228,21 @@ void test_pieces(void)
 
    // Show edge we are looking for and edges found
    match_edge.draw();
-   for( Edge edge : potential )
-      {
-      match_edge.compare(edge);
-      }
+   std::vector<std::pair<ssize_t, float>> piece_errors;
+   for (size_t i = 0; i < potential.size(); ++i)
+    {
+        Edge edge = potential[i];
+        float piece_err = match_edge.compare(edge);
+        piece_errors.push_back(std::make_pair(i, piece_err));
+    }
+    std::sort(piece_errors.begin(), piece_errors.end(),
+        [](const std::pair<ssize_t, float>& first, const std::pair<ssize_t, float>& second) {
+            return first.second < second.second;
+        });
+    for (auto err : piece_errors) {
+        potential[err.first].owner_piece.draw(480, true);
+        cv::waitKey(0);
+    }
 
    //match_edge.compare(should_match);
    }
