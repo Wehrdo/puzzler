@@ -106,10 +106,67 @@ bool intersect_lines(cv::Point v1, cv::Point v2, cv::Point o1, cv::Point o2, cv:
     }
 }
 
+void Piece::characterize_curve( size_t start_idx, size_t end_idx, Curve::curve_type type )
+   {
+
+   cv::Point start_slp, end_slp, start, end, ins_pt;
+
+   // Do the start/end already belong to somebody
+   for( Curve past_curve : curves )
+      {
+      if( (past_curve.start == end_idx) ||
+          (past_curve.end == start_idx) )
+         return;
+      }
+
+   // Find tangent lines
+   start_slp = find_tangent_angle( start_idx, contour );
+   end_slp = find_tangent_angle( end_idx, contour );
+   start = contour[start_idx];
+   end = contour[end_idx];
+
+   bool intersect = intersect_lines( start_slp, end_slp, start, end, ins_pt );
+   int within = pointPolygonTest( contour, ins_pt, false );
+   bool desired = ((type == Curve::indent  && !(within >0) )||
+                   (type == Curve::outdent && (within > 0 )));
+
+   // If cross and in right place
+   if( intersect && desired )
+      {
+      size_t temp = start_idx;
+      bool wrapped = false;
+      std::vector<cv::Point> curve;
+      while( temp != (end_idx+1) )
+         {
+         curve.push_back( contour[temp] );
+         temp = next_index( contour, temp, wrapped );
+         }
+
+      // Find ellipse and compare sizes
+      cv::RotatedRect best_fit = fitEllipse( curve );
+      cv::Point2f circ;
+      float radius;
+      cv::minEnclosingCircle( curve, circ, radius );
+      float circ_area = M_PI*pow(radius, 2 );
+      float rect_area = best_fit.size.area();
+      float ratio_area = circ_area / rect_area;
+
+      if( ratio_area < 0.8 || ratio_area > 1.5 )
+         return;
+
+      // Add and return
+      Curve to_add(start_idx, end_idx, cv::Point(best_fit.center), type );
+      curves.push_back( to_add );
+      std::cout << "Found a curve! Coords: first, second, centre: " << start << ", " << end << ", " << best_fit.center << std::endl;
+      }
+
+   }
+
 void Piece::find_indents( void )
    {
    std::cout << "Finding indents" << std::endl;
 
+   // For every defect, find our inflection points
    for( unsigned int dft_idx = 0; dft_idx < defect_index.size(); dft_idx++ )
       {
       unsigned int defect = defect_index[dft_idx];
@@ -123,61 +180,10 @@ void Piece::find_indents( void )
          }
 
       // Find inflection points before and after maxima
-      unsigned int prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
-      unsigned int nxt_inf = inflection_index[inf_idx];
+      size_t prv_inf = inflection_index[prev_index( inflection_index, inf_idx, wrapped )];
+      size_t nxt_inf = inflection_index[inf_idx];
 
-      // Calculate tanget lines from inflection points
-      cv::Point prv_slp, nxt_slp, prv, nxt, ins_pt;
-      prv_slp = find_tangent_angle( prv_inf, contour );
-      nxt_slp = find_tangent_angle( nxt_inf, contour );
-
-      prv = contour[prv_inf];
-      nxt = contour[nxt_inf];
-
-      std::cout << "Considering inflection points: " << prv_inf << ", " <<  nxt_inf << std::endl;
-
-      bool intersect = intersect_lines( prv_slp, nxt_slp, prv, nxt, ins_pt );
-      std::cout << "Lines " << (intersect?"do ":"do not ") << "intersect" << std::endl;
-      int within = pointPolygonTest( contour, ins_pt, false );
-      if( intersect && !( within > 0 ) )
-         {
-         std::cout << "Lines crossed outside shape" << std::endl;
-         //unsigned int start = inflection_index[prv_inf];
-         wrapped = false;
-         unsigned int start = prv_inf;
-         std::vector<cv::Point> curve;
-         wrapped = false;
-         while( start != (nxt_inf+1) )
-            {
-            curve.push_back( contour[start] );
-            std::cout << "Adding point " << start << " to curve." << std::endl;
-            start = next_index( contour, start, wrapped );
-            }
-         // Find the center of indent
-         cv::RotatedRect best_fit = fitEllipse( curve );
-
-         cv::Point2f circ;
-         float radius;
-         cv::minEnclosingCircle( curve, circ, radius );
-
-         // compare area of circle with area of rotated rect
-         float circ_area = M_PI*pow(radius, 2);
-         float rect_area = best_fit.size.area();
-         float ratio_area = circ_area / rect_area;
-         std::cout << "circle area: " << circ_area << std::endl;
-         std::cout << "rect area: " << rect_area << std::endl;
-         std:: cout << "ratio of areas " << ratio_area << std::endl;
-
-         if( ratio_area < 0.8 || ratio_area > 1.5 )
-            continue;
-
-         Curve to_add( prv_inf, nxt_inf,  cv::Point(best_fit.center), Curve::indent );
-         curves.push_back( to_add );
-
-         std::cout << "Found a curve! We've found " << curves.size() << " so far." << std::endl;
-         std::cout << "coords: first, second, centre: " << prv << nxt << best_fit.center << std::endl;
-
-         }
+      characterize_curve( prv_inf, nxt_inf, Curve::indent );
       }
    }
 
@@ -185,106 +191,36 @@ void Piece::find_outdents( void )
    {
    std::cout << "Finding outdents" << std::endl;
    // Find our inflection point indexes.
-   for( unsigned int first_infl = 0; first_infl < inflection_index.size(); first_infl++ )
+   for( size_t first_infl_idx = 0; first_infl_idx < inflection_index.size(); first_infl_idx++ )
       {
       bool wrapped = false;
-      unsigned int second_infl = next_index( inflection_index, first_infl, wrapped );
-
-      std::cout << "ifnl points: first, " << inflection_index[first_infl] << " second, " << inflection_index[second_infl] << std::endl;
-
-      cv::Point first = contour[ inflection_index[ first_infl ] ];
-      cv::Point second = contour[ inflection_index[ second_infl ] ];
+      size_t first_infl = inflection_index[first_infl_idx];
+      size_t second_infl = inflection_index[next_index( inflection_index, first_infl_idx, wrapped )];
 
       // Iterate until find first hull pt between first and second
       size_t hull_idx = 0;
       wrapped = false;
-      while( hull_index[hull_idx] < inflection_index[ first_infl ] && !wrapped)
+      while( hull_index[hull_idx] < first_infl && !wrapped)
          {
          hull_idx = next_index( hull_index, hull_idx, wrapped );
          }
 
-      if(
-         (inflection_index[first_infl] < inflection_index[second_infl] &&
-          (hull_index[hull_idx] >= inflection_index[second_infl] ||
-           hull_index[hull_idx] <= inflection_index[first_infl] )
-         )
+      // Determine wrether we are at the end of our rope
+      size_t hull = hull_index[hull_idx];
+      if( (first_infl < second_infl &&
+           ( hull >= second_infl || hull <= first_infl )
+           )
           ||
-         (
-          inflection_index[first_infl] > inflection_index[second_infl] &&
-          hull_index[hull_idx] < inflection_index[first_infl] &&
-          hull_index[hull_idx] > inflection_index[second_infl]
+          (first_infl > second_infl && hull < first_infl && hull > second_infl)
          )
-        )
          {
          std::cout << "No convex between these infl pts" << std::endl;
          continue;
          }
 
-      // Calculate tangent lines
-      cv::Point first_slp, second_slp, ins_pt;
-      first_slp = find_tangent_angle( inflection_index[first_infl], contour );
-      second_slp = find_tangent_angle( inflection_index[second_infl], contour );
+      // Find it!
+      characterize_curve( first_infl, second_infl, Curve::outdent );
 
-      // do they intersect?
-      bool intersect = intersect_lines( first_slp, second_slp, first, second, ins_pt );
-      int within = pointPolygonTest( contour, ins_pt, false );
-
-      std::cout << "Lines do " << (intersect?"":"not ") << "intersect" << std::endl;
-      std::cout << "Lines intersect at " << ins_pt << std::endl;
-
-      // If intersect within piece
-      if( intersect && (within > 0 ) )
-         {
-
-         std::cout << "Tanget lines crossed inside, finding points along curve" << std::endl;
-
-         // Check if start/stop points have already been used
-         bool fake_curve = false;
-         for( Curve past_curve : curves )
-            {
-            if( past_curve.start == (inflection_index[second_infl]) ||
-                past_curve.end == inflection_index[first_infl] )
-               fake_curve = true;
-            }
-
-         if( fake_curve )
-            continue;
-
-         // Find points that characterize curve
-         size_t start = inflection_index[first_infl];
-         std::vector<cv::Point> curve;
-         wrapped = false;
-         while( start != (inflection_index[second_infl]+1) )
-            {
-            curve.push_back( contour[start] );
-            std::cout << "Adding point " << start << " to curve." << std::endl;
-            start = next_index( contour, start, wrapped );
-            }
-
-         // Find ellipse of best fit
-         cv::RotatedRect best_fit = fitEllipse( curve );
-         cv::Point2f circ;
-         float radius;
-         cv::minEnclosingCircle( curve, circ, radius );
-
-         // compare area of circle with area of rotated rect
-         float circ_area = M_PI*pow(radius, 2);
-         float rect_area = best_fit.size.area();
-         float ratio_area = circ_area / rect_area;
-         std::cout << "circle area: " << circ_area << std::endl;
-         std::cout << "rect area: " << rect_area << std::endl;
-         std:: cout << "ratio of areas " << ratio_area << std::endl;
-
-         if( ratio_area < 0.8 || ratio_area > 1.5 )
-            continue;
-
-         // Add to the piece's curve list
-         Curve to_add( inflection_index[first_infl], inflection_index[second_infl], cv::Point( best_fit.center), Curve::outdent );
-         curves.push_back(to_add);
-
-         std::cout << "Found a curve! We've found " << curves.size() << " so far." << std::endl;
-         std::cout << "coords: first, second, centre: " << first << second << best_fit.center << std::endl;
-         }
       }
    }
 
