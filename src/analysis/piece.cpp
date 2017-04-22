@@ -220,7 +220,6 @@ void Piece::find_outdents( void )
 
       // Find it!
       characterize_curve( first_infl, second_infl, Curve::outdent );
-
       }
    }
 
@@ -250,17 +249,13 @@ void Piece::draw( unsigned int width, bool with_image )
    auto convert_coord = [scale, min_x, min_y, max_x, max_y](cv::Point pt)
       {
          return cv::Point((pt.x - min_x.x) * scale,
-                          scale * (max_y.y - pt.y));};
+                          (pt.y - min_y.y) * scale);};
 
    // Create image matrix with dimensions to fill width, and proportional height
    cv::Mat out_img(height, width, CV_8UC3, cv::Scalar(0));
    if (with_image) {
        cv::Mat scaled_img;
-       int max_y_orig = raw_image.rows - min_y.y;
-       int min_y_orig = raw_image.rows - max_y.y;
        cv::resize(raw_image.rowRange(min_y.y, max_y.y).colRange(min_x.x, max_x.x), out_img, cv::Size(width, height));
-       // Flip vertically
-       cv::flip(out_img, out_img, 0);
    }
    cv::Scalar white = cv::Scalar(255, 255, 255);
    cv::Scalar red = cv::Scalar(0, 0, 255);
