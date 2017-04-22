@@ -79,7 +79,7 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    cv::Point2f temp_pt;
 
    // length of corner we are creating
-   float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2) / (3.0/4.0);
+   float length = sqrt( pow(start.x - end.x, 2) + pow(start.y - end.y, 2 ) ) / sqrt(2);
 
    // Starting point, along X axis with offset
    corner.x = start.x + length;
@@ -100,10 +100,6 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
 
    Piece to_return;
 
-   // Add new point
-   to_return.contour.push_back( transformed[0] );
-   to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
-
    // Copy over selected points
    to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
    to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
@@ -111,6 +107,10 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    // Flip order, because we are esentially flipping piece inside out
    std::reverse(to_return.contour.begin(), to_return.contour.end() );
    std::reverse(to_return.points.begin(), to_return.points.end() );
+
+ // Add new point
+   to_return.contour.push_back( transformed[0] );
+   to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
 
    // Find inflection points, process
    std::vector<size_t> infl_idx = find_inflections( to_return.points );
@@ -162,23 +162,34 @@ void test_pieces(void)
 
    // Pieces to process
    std::vector<cv::Mat> images;
-   images.push_back( cv::imread("../../images/camera/cam_pieces.png", 1 ));
+   images.push_back( cv::imread("../../images/camera/cam_masked.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
-    
-    for( cv::Mat image : images ) {
-      std::vector<Piece> found = find_pieces( image );
-      pieces.insert( pieces.end(), found.begin(), found.end() );
+
+   std::vector<Piece> partials;
+    for( cv::Mat image : images )
+       {
+       std::vector<Piece> temp;
+       std::vector<Piece> found = find_pieces( image, temp );
+       pieces.insert( pieces.end(), found.begin(), found.end() );
+       partials.insert( partials.end(), temp.begin(), temp.end() );
       }
    std::cout << "Found " << pieces.size() << " pieces." << std::endl;
+   std::cout << "Found " << partials.size() << " partials." << std::endl;
+   if( partials.size() != 1 )
+      {
+      std::cout << "Too many partials. Exiting." << std::endl;
+      return;
+      }
 
    // Pieces matching to
-   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
+   //   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
    // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
-   std::vector<Piece> match_to_vec = find_pieces( test_img );
-   Piece match_to = match_to_vec[0];
+   // std::vector<Piece> match_to_vec = find_pieces( partials[0] );
+   // Piece match_to = match_to_vec[0];
+   Piece match_to = partials[0];
 
    // Create GUI object
    PuzzleGUI gui("User GUI");
@@ -198,9 +209,9 @@ void test_pieces(void)
       // auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
       // Draw processed pieces to screen
-      pieces[i].draw( 480 );
-      std::cout << "Showing image " << i << std::endl;
-      while(cv::waitKey(30) != ' ' );
+      // pieces[i].draw( 480 );
+      // std::cout << "Showing image " << i << std::endl;
+      // while(cv::waitKey(30) != ' ' );
 
       }
 
