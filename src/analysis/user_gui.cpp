@@ -11,7 +11,7 @@ void PuzzleGUI::mouse_cb(int event, int x, int y, int flags, void *obj) {
     that->mouse_cb(event, x, y, flags);
 }
 
-void PuzzleGUI::mouse_cb(int event, int x, int y, int flags) {
+void PuzzleGUI::mouse_cb(int event, int x, int y, int flags __attribute__((unused))) {
     cv::Scalar red(0, 0, 255);
     cv::Scalar green(0, 255, 0);
     piece_img.copyTo(buffer);
@@ -46,12 +46,12 @@ PuzzleGUI::PuzzleGUI(string name)
 // Function converts x,y values to pixel opencv point representing pixel location
 // Also takes into account that positive Y points downward in graphics
 Point PuzzleGUI::pt2img_pt(Point pt) {
-    return Point((pt.x - min_x.x) * scale, scale * (max_y.y - pt.y));
+    return Point((pt.x - min_x.x) * scale, scale * (pt.y - min_y.y));
 }
 
 Point PuzzleGUI::img_pt2pt(Point pt) {
     return Point((pt.x / scale) + min_x.x,
-                 max_y.y - (pt.y / scale));
+                 (pt.y / scale) + min_y.y);
 }
 
 pair<size_t, size_t> PuzzleGUI::select_edge(Piece piece)

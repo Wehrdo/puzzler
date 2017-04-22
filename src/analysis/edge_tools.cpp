@@ -22,7 +22,7 @@ Vec2d find_tangent_angle(int idx, vector<Vec2d> points) {
 
 cv::Mat draw_curve(const vector<cv::Point>& points, int width) {
     vector<Vec2d> as_vecs(points.size());
-    for (int i = 0; i < points.size(); ++i) {
+    for (size_t i = 0; i < points.size(); ++i) {
         as_vecs[i] = Vec2d(points[i].x, points[i].y);
     }
     return draw_curve(as_vecs, width, vector<size_t>(), vector<size_t>(), vector<pair<size_t, size_t>>(), false);
@@ -47,7 +47,7 @@ cv::Mat draw_curve(const vector<Vec2d>& points, int width, vector<size_t> inflec
     cv::Mat out_img(height, width, CV_8UC3, cv::Scalar(0));
     cv::Scalar white = cv::Scalar(255, 255, 255);
     cv::Scalar red = cv::Scalar(0, 0, 255);
-    cv::Scalar blue = cv::Scalar(255, 80, 80);
+    // cv::Scalar blue = cv::Scalar(255, 80, 80);
     cv::Scalar green = cv::Scalar(0, 255, 0);
     cv::Scalar orange = cv::Scalar(0, 165, 255);
 
