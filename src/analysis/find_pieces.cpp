@@ -61,7 +61,7 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    img.copyTo(original_image);
    // convert to greyscale
    cvtColor( img, img, CV_BGR2GRAY );
-   img = img > 100;
+   img = img > 80;
 
    // apply median filter
    dilate(1, 5, img);

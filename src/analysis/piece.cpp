@@ -111,6 +111,13 @@ void Piece::characterize_curve( size_t start_idx, size_t end_idx, Curve::curve_t
 
    cv::Point start_slp, end_slp, start, end, ins_pt;
 
+   // Is the curve at least 3 points?
+   ssize_t n_points = start_idx < end_idx ? end_idx - start_idx + 1 : 
+                                           (end_idx + contour.size()) - start_idx + 1;
+   if (n_points < 5) {
+       return;
+   }
+
    // Do the start/end already belong to somebody
    for( Curve past_curve : curves )
       {
