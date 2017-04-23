@@ -41,7 +41,7 @@ private:
     void mouse_cb(int event, int x, int y, int flags);
     
     std::string window_name;
-    int window_width = 520;
+    int window_width = 1280;
     int window_height;
 
 

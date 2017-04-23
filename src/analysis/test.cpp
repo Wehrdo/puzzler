@@ -162,7 +162,10 @@ void test_pieces(void)
 
    // Pieces to process
    std::vector<cv::Mat> images;
-   images.push_back( cv::imread("../../images/camera/nemo.jpg", 1 ));
+//    images.push_back( cv::imread("../../images/camera/nemo.jpg", 1 ));
+   images.push_back( cv::imread("../../images/camera/large_closeup_partial.jpg", 1 ));
+   images.push_back( cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1 ));
+   images.push_back( cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
 //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));

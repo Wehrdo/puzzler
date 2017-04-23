@@ -63,7 +63,8 @@ pair<size_t, size_t> PuzzleGUI::select_edge(Piece piece)
     finding_pt = 0;
     start_pt_idx = end_pt_idx = 0;
 
-    namedWindow(window_name);
+    namedWindow(window_name, WINDOW_NORMAL);
+    resizeWindow(window_name, 560, 560);
     // Any mouse event will call mouse_mv_cb
     setMouseCallback(window_name, mouse_cb, this);
 
@@ -167,13 +168,26 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
     //     cv::waitKey(0);
     // }
 
+    // Found no matches
+    if (piece_errors[0].first == INFINITY) {
+        cout << "Sorry, found no matches." << endl;
+        return;
+    }
+
     // Calculate standard deviation of errors
     double mean_x = 0;
     double mean_x2 = 0;
+    int n_valid = 0;
     for (auto edge_match : piece_errors) {
-        mean_x += edge_match.second / piece_errors.size();
-        mean_x2 += (edge_match.second * edge_match.second) / piece_errors.size();
+        // Invalid matches have error of infinity
+        if (edge_match.second != INFINITY) {
+            mean_x += edge_match.second;
+            mean_x2 += (edge_match.second * edge_match.second);
+            n_valid++;
+        }
     }
+    mean_x /= n_valid;
+    mean_x2 /= n_valid;
     double stdev = sqrt(mean_x2 - (mean_x * mean_x));
     // Allow up to 0.5 standard deviations above minimum error
     double max_valid_error = piece_errors[0].second + 0.4*stdev;
