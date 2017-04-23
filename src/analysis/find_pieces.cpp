@@ -48,7 +48,7 @@ void dilate( int type, int size, cv::Mat img )
 * Find individual pieces, extract their points,
 * and store in a vector of piece types.
 */
-std::vector<Piece> find_pieces( cv::Mat img )
+std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    {
 
    // Vector of edges of objects
@@ -104,18 +104,22 @@ std::vector<Piece> find_pieces( cv::Mat img )
    // Cycle through remaining edges, add average-sized objects to output
    for( i = 0; i < contours.size(); i++ )
       {
+      Piece to_add;
+      to_add.raw_image = original_image;
+
+      cv::approxPolyDP(contours[i], to_add.contour, 1, true );
+      unsigned int j;
+      for( j = 0; j < to_add.contour.size(); j++ )
+         {
+         to_add.points.push_back(Vec2d(to_add.contour[j].x, img.rows -  to_add.contour[j].y));
+         }
       if( contourArea(contours[i]) < (average_size*size_factor) )
          {
-         Piece to_add;
-         to_add.raw_image = original_image;
-
-         cv::approxPolyDP(contours[i], to_add.contour, 1, true );
-         unsigned int j;
-         for( j = 0; j < to_add.contour.size(); j++ )
-            {
-            to_add.points.push_back(Vec2d(to_add.contour[j].x, img.rows -  to_add.contour[j].y));
-            }
          pieces.push_back(to_add);
+         }
+      else
+         {
+         partials.push_back(to_add);
          }
       }
 

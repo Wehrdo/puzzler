@@ -41,7 +41,7 @@ class Piece
     void set_inflection(std::vector<std::size_t> infl);
     void find_indents(void);
     void find_outdents(void);
-    void find_outdents_old(void);
+    void characterize_curve( size_t start_idx, size_t end_idx, Curve::curve_type type );
     void draw(unsigned int width);
     void draw(unsigned int width, bool with_image);
 };

@@ -11,7 +11,7 @@
 // Local includes
 #include "piece.hpp"
 
-std::vector<Piece> find_pieces( cv::Mat img );
+std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials );
 
 
 #endif /* FIND_POINTS_H */
