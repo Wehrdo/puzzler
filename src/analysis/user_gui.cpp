@@ -176,7 +176,7 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
     }
     double stdev = sqrt(mean_x2 - (mean_x * mean_x));
     // Allow up to 0.5 standard deviations above minimum error
-    double max_valid_error = piece_errors[0].second + 0.3*stdev;
+    double max_valid_error = piece_errors[0].second + 0.4*stdev;
 
     Scalar red(0, 0, 255);
 
@@ -209,6 +209,7 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
         string window_name = string("Picture ") + to_string(img_id);
         namedWindow(window_name, WINDOW_NORMAL);
         imshow(window_name, highlight.second);
+        resizeWindow(window_name, 560, 560);
         img_id++;
     }
     waitKey(0);

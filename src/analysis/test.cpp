@@ -226,8 +226,8 @@ void test_pieces(void)
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
 
    // Show fake piece to screen
-   fake.draw( 480 );
-   while(cv::waitKey(30) != ' ' );
+//    fake.draw( 480 );
+//    while(cv::waitKey(30) != ' ' );
 
    // Create edge from faked piece
    Edge match_edge( fake, fake.curves );

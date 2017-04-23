@@ -123,9 +123,9 @@ float Edge::compare(const Edge &that)
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
-    namedWindow("itsawindow");
-    Mat moved_curve = draw_curve(all_pts, 480);
-    imshow("itsawindow", moved_curve);
-    waitKey(0);
+    // namedWindow("itsawindow");
+    // Mat moved_curve = draw_curve(all_pts, 480);
+    // imshow("itsawindow", moved_curve);
+    // waitKey(0);
     return error;
 }
