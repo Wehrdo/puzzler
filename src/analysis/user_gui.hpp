@@ -1,9 +1,13 @@
 #ifndef USER_GUI_HPP
 #define USER_GUI_HPP
 
+#include <vector>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 #include "piece.hpp"
+#include "edge.hpp"
+
+void highlight_matches(Edge match_edge, std::vector<Edge> potential);
 
 class PuzzleGUI {
 public:
@@ -37,11 +41,14 @@ private:
     void mouse_cb(int event, int x, int y, int flags);
     
     std::string window_name;
-    int window_width = 560;
+    int window_width = 520;
+    int window_height;
 
 
-    // Image of the piece
+    // Image of the piece with lines drawn
     cv::Mat piece_img;
+    // The raw image that this piece corresponds to
+    cv::Mat raw_image;
     // Buffer to draw to
     cv::Mat buffer;
     size_t start_pt_idx;

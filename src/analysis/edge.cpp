@@ -84,7 +84,7 @@ float Edge::compare(const Edge &that)
     vector<Point> moved_pts;
     // vector<Point> moved_pts(that.points.begin(), that.points.end());
     transform(that.points, moved_pts, trans_mat);
-    cout << "Rotating by " << amt_to_rotate * RAD_TO_DEG << endl;
+    // cout << "Rotating by " << amt_to_rotate * RAD_TO_DEG << endl;
     transform(moved_pts, moved_pts, rot_mat);
 
     // Copy and reverse these points
@@ -119,13 +119,13 @@ float Edge::compare(const Edge &that)
     transform(moved_pts, moved_pts, opt_tran);
     vector<Point> all_pts(static_pts);
     all_pts.insert(all_pts.end(), moved_pts.begin(), moved_pts.end());
-    Mat moved_curve = draw_curve(all_pts, 480);
 
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
-    // namedWindow("itsawindow");
-    // imshow("itsawindow", moved_curve);
-    // waitKey(0);
+    namedWindow("itsawindow");
+    Mat moved_curve = draw_curve(all_pts, 480);
+    imshow("itsawindow", moved_curve);
+    waitKey(0);
     return error;
 }

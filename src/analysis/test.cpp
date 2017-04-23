@@ -176,7 +176,7 @@ void test_pieces(void)
 
    // Pieces matching to
    cv::Mat test_img = cv::imread( "../../images/camera/cam_partial.png", 1 );
-   // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
+//    cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
    std::vector<Piece> match_to_vec = find_pieces( test_img );
    Piece match_to = match_to_vec[0];
 
@@ -225,26 +225,7 @@ void test_pieces(void)
    std::vector<Edge> potential;
    potential = find_to_compare( pieces, match_edge );
    std::cout << "Found " << potential.size() << " edges to try." << std::endl;
-
-   // Show edge we are looking for and edges found
-   match_edge.draw();
-   std::vector<std::pair<ssize_t, float>> piece_errors;
-   for (size_t i = 0; i < potential.size(); ++i)
-    {
-        Edge edge = potential[i];
-        float piece_err = match_edge.compare(edge);
-        piece_errors.push_back(std::make_pair(i, piece_err));
-    }
-    std::sort(piece_errors.begin(), piece_errors.end(),
-        [](const std::pair<ssize_t, float>& first, const std::pair<ssize_t, float>& second) {
-            return first.second < second.second;
-        });
-    for (auto err : piece_errors) {
-        potential[err.first].owner_piece.draw(480, true);
-        cv::waitKey(0);
-    }
-
-   //match_edge.compare(should_match);
+   highlight_matches(match_edge, potential);
    }
 
 int main()
