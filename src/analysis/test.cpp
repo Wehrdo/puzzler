@@ -13,28 +13,30 @@
 #include <algorithm>
 #include <opencv2/opencv.hpp>
 
-std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
+using namespace std;
+
+vector<Edge> find_to_compare( vector<Piece> pieces, Edge match_to )
    {
-   std::vector<Edge> to_return;
+   vector<Edge> to_return;
    size_t num = match_to.types.size();
 
-   std::cout << "Looking for ";
+   cout << "Looking for ";
    for( size_t i = 0; i < num; i++ )
-      std::cout << match_to.types[i] << ", ";
-   std::cout << std::endl;
+      cout << match_to.types[i] << ", ";
+   cout << endl;
 
    // For ever piece
    size_t piece_index = 0;
    for( Piece piece : pieces )
       {
-      std::cout << "Looking at piece: " << std::to_string(piece_index++) << std::endl;
+      cout << "Looking at piece: " << to_string(piece_index++) << endl;
 
       // Starting at every curve in piece
       bool to_add = true;
-      std::vector<Curve> potential;
+      vector<Curve> potential;
       for( size_t curve_index = 0; curve_index < piece.curves.size(); curve_index++ )
          {
-         std::cout << "Checking curve: " << std::to_string( curve_index ) << std::endl;
+         cout << "Checking curve: " << to_string( curve_index ) << endl;
 
          potential.clear();
          to_add = true;
@@ -47,7 +49,7 @@ std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
          // Check needed number of curves in advance
          for( size_t j = 0; j < num; j++ )
             {
-            std::cout << "Looking for " << match_to.types[j] << " found " << piece.curves[(j+curve_index)%num_curves].type << std::endl;
+            cout << "Looking for " << match_to.types[j] << " found " << piece.curves[(j+curve_index)%num_curves].type << endl;
 
             // Prematurely add
             potential.push_back( piece.curves[(j+curve_index)%num_curves]);
@@ -60,7 +62,7 @@ std::vector<Edge> find_to_compare( std::vector<Piece> pieces, Edge match_to )
             }
          if( to_add )
             {
-            std::cout << "Found potential edge! Adding edge " << std::to_string(curve_index) << " from piece " << std::to_string(piece_index) << std::endl;
+            cout << "Found potential edge! Adding edge " << to_string(curve_index) << " from piece " << to_string(piece_index) << endl;
             Edge new_edge(piece, potential );
             to_return.push_back( new_edge );
             }
@@ -94,34 +96,34 @@ Piece piece_to_fake( Piece input, size_t start_idx, size_t end_idx )
    angle += -1*atan2(temp_pt.y, temp_pt.x)*180.0/M_PI;
    // rotate be amount existing line is from normal
    cv::Mat trans = cv::getRotationMatrix2D( start, angle, 1 );
-   std::vector<cv::Point> to_transform(1, corner );
-   std::vector<cv::Point> transformed;
+   vector<cv::Point> to_transform(1, corner );
+   vector<cv::Point> transformed;
    cv::transform( to_transform, transformed, trans );
 
    Piece to_return;
 
    // Copy over selected points
-   to_return.contour = std::vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
-   to_return.points = std::vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
+   to_return.contour = vector<cv::Point>( &(input.contour[start_idx]), &(input.contour[end_idx]) );
+   to_return.points = vector<Vec2d>( &(input.points[start_idx]), &(input.points[end_idx]) );
 
    // Flip order, because we are esentially flipping piece inside out
-   std::reverse(to_return.contour.begin(), to_return.contour.end() );
-   std::reverse(to_return.points.begin(), to_return.points.end() );
+   reverse(to_return.contour.begin(), to_return.contour.end() );
+   reverse(to_return.points.begin(), to_return.points.end() );
 
  // Add new point
    to_return.contour.push_back( transformed[0] );
    to_return.points.push_back( Vec2d(transformed[0].x, transformed[0].y ) );
 
    // Find inflection points, process
-   std::vector<size_t> infl_idx = find_inflections( to_return.points );
+   vector<size_t> infl_idx = find_inflections( to_return.points );
    to_return.set_inflection( infl_idx );
    to_return.process();
 
    return to_return;
    }
 
-std::vector<Vec2d> gen_curve(int N, double start, double end, std::function<double(double)> func) {
-    std::vector<Vec2d> points;
+vector<Vec2d> gen_curve(int N, double start, double end, function<double(double)> func) {
+    vector<Vec2d> points;
     double range = end - start;
     for (int i = 0; i < N; i++) {
         double x = range * (double(i) / N) + start;
@@ -146,9 +148,9 @@ void test_function(void)
    {
 
     int N = 48;
-    std::vector<Vec2d> points = gen_curve(N, -1.25, 1.4, polynomial);
+    vector<Vec2d> points = gen_curve(N, -1.25, 1.4, polynomial);
     auto infl_indices = find_inflections(points);
-    // cv::Mat img = draw_curve(points, 480, infl_indices, std::vector<size_t>(), true);
+    // cv::Mat img = draw_curve(points, 480, infl_indices, vector<size_t>(), true);
     // cv::namedWindow("AWESOME", cv::WINDOW_AUTOSIZE);
     // cv::imshow("AWESOME", img);
     // cv::waitKey(0);
@@ -156,41 +158,63 @@ void test_function(void)
    }
 
 
-void test_pieces(void)
-   {
-   std::vector<Piece> pieces;
+vector<cv::Mat> obtain_images() {
+   vector<cv::Mat> images;
+   cv::VideoCapture cap;
+   if (!cap.open(0)) {
+      cout << "Failed to open webcam" << endl;
+      return images;
+   }
 
-   // Pieces to process
-   std::vector<cv::Mat> images;
-//    images.push_back( cv::imread("../../images/camera/nemo.jpg", 1 ));
-   images.push_back( cv::imread("../../images/camera/large_closeup_partial.jpg", 1 ));
-   images.push_back( cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1 ));
-   images.push_back( cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1 ));
-//    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
-//    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
-//    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
-//    images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
+   while (1) {
+      cv::Mat frame;
+      cap >> frame;
+      // cv::Mat blue(frame.rows, frame.cols, CV_8UC1);
+      // cv::Mat green(frame.rows, frame.cols, CV_8UC1);
+      // cv::Mat red(frame.rows, frame.cols, CV_8UC1);
+      // cv::Mat channels[3] = {blue, green, red};
+      // cv::split(frame, channels);
+      // cv::equalizeHist(blue, blue);
+      // cv::equalizeHist(green, green);
+      // cv::equalizeHist(red, red);
+      // cv::merge(channels, 3, frame);
+      cv::imshow("webcam", frame);
+      char key = cv::waitKey(30);
+      // Enter key
+      if (key == 10) {
+         return images;
+      }
+      if (key == ' ') {
+         cv::Mat frame_dup = frame.clone();
+         images.push_back(frame_dup);
+      }
+      cout << (int)key << endl;
+   }
+}
 
-   std::vector<Piece> partials;
+void test_pieces(vector<cv::Mat> images) {
+   vector<Piece> pieces;
+
+   vector<Piece> partials;
     for( cv::Mat image : images )
        {
-       std::vector<Piece> temp;
-       std::vector<Piece> found = find_pieces( image, temp );
+       vector<Piece> temp;
+       vector<Piece> found = find_pieces( image, temp );
        pieces.insert( pieces.end(), found.begin(), found.end() );
        partials.insert( partials.end(), temp.begin(), temp.end() );
       }
-   std::cout << "Found " << pieces.size() << " pieces." << std::endl;
-   std::cout << "Found " << partials.size() << " partials." << std::endl;
+   cout << "Found " << pieces.size() << " pieces." << endl;
+   cout << "Found " << partials.size() << " partials." << endl;
    if( partials.size() != 1 )
       {
-      std::cout << "Too many partials. Exiting." << std::endl;
+      cout << "Too many partials. Exiting." << endl;
       return;
       }
 
    // Pieces matching to
    //   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
    // cv::Mat test_img = cv::imread( "../../images/pieces/test_1_2.png", 1 );
-   // std::vector<Piece> match_to_vec = find_pieces( partials[0] );
+   // vector<Piece> match_to_vec = find_pieces( partials[0] );
    // Piece match_to = match_to_vec[0];
    Piece match_to = partials[0];
 
@@ -198,8 +222,8 @@ void test_pieces(void)
    PuzzleGUI gui("User GUI");
 
    // Hold found inflection points
-   std::vector<std::size_t> infl_indices;
-   std::vector<Vec2d> infl_points;
+   vector<size_t> infl_indices;
+   vector<Vec2d> infl_points;
 
    for( size_t i = 0; i < pieces.size(); i++ )
       {
@@ -213,17 +237,17 @@ void test_pieces(void)
 
       // Draw processed pieces to screen
       // pieces[i].draw( 480 );
-      // std::cout << "Showing image " << i << std::endl;
+      // cout << "Showing image " << i << endl;
       // while(cv::waitKey(30) != ' ' );
 
       }
 
    // // Prompt user for image
-   std::pair<size_t, size_t> selection = gui.select_edge( match_to );
+   pair<size_t, size_t> selection = gui.select_edge( match_to );
 
    // // Extract first and last points from selected region
-   size_t start_idx = std::get<0>(selection);
-   size_t end_idx = std::get<1>(selection);
+   size_t start_idx = get<0>(selection);
+   size_t end_idx = get<1>(selection);
 
    // Create "fake piece" from selection
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
@@ -236,14 +260,34 @@ void test_pieces(void)
    Edge match_edge( fake, fake.curves );
 
    // Find edges from remaining pieces that could match
-   std::vector<Edge> potential;
+   vector<Edge> potential;
    potential = find_to_compare( pieces, match_edge );
-   std::cout << "Found " << potential.size() << " edges to try." << std::endl;
+   cout << "Found " << potential.size() << " edges to try." << endl;
    highlight_matches(match_edge, potential);
-   }
+}
 
-int main()
+int main(int argc, char *argv[])
    {
-   test_pieces();
-   return 0;
-};
+      // Using webcam
+      if (argc == 2 && strcmp(argv[1], "webcam") == 0)
+      {
+         auto images = obtain_images();
+         cout << "Using " << images.size() << " images" << endl;
+         test_pieces(images);
+      }
+      else
+      {
+         // Pieces to process
+         vector<cv::Mat> images;
+         //    images.push_back( cv::imread("../../images/camera/cam_masked.png", 1 ));
+         images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
+         images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
+         images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
+         //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
+         //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
+         //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
+         //    images.push_back( cv::imread("../../images/rows/row4_shrunk.png", 1 ));
+         test_pieces(images);
+      }
+      return 0;
+   };
