@@ -158,10 +158,10 @@ void test_function(void)
    }
 
 
-vector<cv::Mat> obtain_images() {
+vector<cv::Mat> obtain_images(int camera_num) {
    vector<cv::Mat> images;
    cv::VideoCapture cap;
-   if (!cap.open(0)) {
+   if (!cap.open(camera_num)) {
       cout << "Failed to open webcam" << endl;
       return images;
    }
@@ -269,9 +269,14 @@ void test_pieces(vector<cv::Mat> images) {
 int main(int argc, char *argv[])
    {
       // Using webcam
-      if (argc == 2 && strcmp(argv[1], "webcam") == 0)
+   if ( (argc == 2 || argc == 3 ) && strcmp(argv[1], "webcam") == 0)
       {
-         auto images = obtain_images();
+      int camera_num = 0;
+      if( argc == 3 )
+         {
+         sscanf(argv[2], "%d", &camera_num );
+         }
+         auto images = obtain_images( camera_num );
          cout << "Using " << images.size() << " images" << endl;
          test_pieces(images);
       }
