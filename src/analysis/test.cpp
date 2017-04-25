@@ -202,14 +202,17 @@ void test_pieces(vector<cv::Mat> images) {
        vector<Piece> found = find_pieces( image, temp );
        pieces.insert( pieces.end(), found.begin(), found.end() );
        partials.insert( partials.end(), temp.begin(), temp.end() );
-      }
+       found[found.size()-1].draw(480);
+       while(cv::waitKey(30) != ' ' );
+       }
    cout << "Found " << pieces.size() << " pieces." << endl;
    cout << "Found " << partials.size() << " partials." << endl;
-   if( partials.size() != 1 )
-      {
-      cout << "Too many partials. Exiting." << endl;
-      return;
-      }
+
+   // if( partials.size() != 1 )
+   //    {
+   //    cout << "Too many partials. Exiting." << endl;
+   //    return;
+   //    }
 
    // Pieces matching to
    //   cv::Mat test_img = cv::imread( "../../images/camera/cam_partial_180.png", 1 );
@@ -284,10 +287,13 @@ int main(int argc, char *argv[])
       {
          // Pieces to process
          vector<cv::Mat> images;
-         //    images.push_back( cv::imread("../../images/camera/cam_masked.png", 1 ));
-         images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
-         images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
-         images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
+            images.push_back( cv::imread("../../images/camera/pokemon.JPG", 1 ));
+         // images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
+         // images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
+         // images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
+
+
+
          //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));

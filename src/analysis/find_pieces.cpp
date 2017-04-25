@@ -54,7 +54,7 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    // Vector of edges of objects
    std::vector<std::vector<cv::Point>> contours;
    std::vector<Piece> pieces;
-   double threshold = 10000.0;
+   double threshold = 1000.0;
    double size_factor = 2.0;
 
    cv::Mat original_image;
@@ -64,10 +64,15 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    img = img > 80;
 
    // apply median filter
-   dilate(1, 5, img);
-   erode(1, 5, img );
-   cv::medianBlur(img, img, 25);
-
+   dilate(1, 3, img);
+   cv::imshow("test", img);
+   while(cv::waitKey(30) != ' ' );
+   erode(1, 3, img );
+   cv::imshow("test", img);
+   while(cv::waitKey(30) != ' ' );
+   cv::medianBlur(img, img, 5);
+   cv::imshow("test", img);
+   while(cv::waitKey(30) != ' ' );
 
 
    // CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
