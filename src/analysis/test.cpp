@@ -165,7 +165,11 @@ vector<cv::Mat> obtain_images(int camera_num) {
       cout << "Failed to open webcam" << endl;
       return images;
    }
-
+   cap.set(CV_CAP_PROP_FOURCC, CV_FOURCC('M', 'J', 'P', 'G'));
+   cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
+   cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
+   cap.set(CV_CAP_PROP_FOCUS, 0.02);
+   cv::namedWindow("webcam", cv::WINDOW_NORMAL);
    while (1) {
       cv::Mat frame;
       cap >> frame;
@@ -188,7 +192,6 @@ vector<cv::Mat> obtain_images(int camera_num) {
          cv::Mat frame_dup = frame.clone();
          images.push_back(frame_dup);
       }
-      cout << (int)key << endl;
    }
 }
 
@@ -202,8 +205,8 @@ void test_pieces(vector<cv::Mat> images) {
        vector<Piece> found = find_pieces( image, temp );
        pieces.insert( pieces.end(), found.begin(), found.end() );
        partials.insert( partials.end(), temp.begin(), temp.end() );
-       found[found.size()-1].draw(480);
-       while(cv::waitKey(30) != ' ' );
+      //  found[found.size()-1].draw(480);
+      //  while(cv::waitKey(30) != ' ' );
        }
    cout << "Found " << pieces.size() << " pieces." << endl;
    cout << "Found " << partials.size() << " partials." << endl;
@@ -239,9 +242,9 @@ void test_pieces(vector<cv::Mat> images) {
       // auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
       // Draw processed pieces to screen
-      // pieces[i].draw( 480 );
+      pieces[i].draw( 480 );
       // cout << "Showing image " << i << endl;
-      // while(cv::waitKey(30) != ' ' );
+      while(cv::waitKey(30) != ' ' );
 
       }
 
@@ -256,8 +259,8 @@ void test_pieces(vector<cv::Mat> images) {
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
 
    // Show fake piece to screen
-//    fake.draw( 480 );
-//    while(cv::waitKey(30) != ' ' );
+   fake.draw( 480 );
+   while(cv::waitKey(30) != ' ' );
 
    // Create edge from faked piece
    Edge match_edge( fake, fake.curves );
@@ -287,13 +290,10 @@ int main(int argc, char *argv[])
       {
          // Pieces to process
          vector<cv::Mat> images;
-            images.push_back( cv::imread("../../images/camera/pokemon.JPG", 1 ));
+            images.push_back( cv::imread("../../images/camera/atlas2.jpg", 1 ));
          // images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
          // images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
          // images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
-
-
-
          //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));
