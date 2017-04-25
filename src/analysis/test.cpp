@@ -242,9 +242,9 @@ void test_pieces(vector<cv::Mat> images) {
       // auto straight_lines = find_straight_sides(pieces[i].points, ((M_PI / 180) * 0.5));
 
       // Draw processed pieces to screen
-      pieces[i].draw( 480 );
+      // pieces[i].draw( 480 );
       // cout << "Showing image " << i << endl;
-      while(cv::waitKey(30) != ' ' );
+      // while(cv::waitKey(30) != ' ' );
 
       }
 
@@ -259,8 +259,8 @@ void test_pieces(vector<cv::Mat> images) {
    Piece fake = piece_to_fake( match_to, start_idx, end_idx );
 
    // Show fake piece to screen
-   fake.draw( 480 );
-   while(cv::waitKey(30) != ' ' );
+   // fake.draw( 480 );
+   // while(cv::waitKey(30) != ' ' );
 
    // Create edge from faked piece
    Edge match_edge( fake, fake.curves );
@@ -290,10 +290,10 @@ int main(int argc, char *argv[])
       {
          // Pieces to process
          vector<cv::Mat> images;
-            images.push_back( cv::imread("../../images/camera/atlas2.jpg", 1 ));
-         // images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
-         // images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
-         // images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
+            // images.push_back( cv::imread("../../images/camera/atlas2.jpg", 1 ));
+         images.push_back(cv::imread("../../images/camera/large_closeup_partial.jpg", 1));
+         images.push_back(cv::imread("../../images/camera/large_closeup_pieces1.jpg", 1));
+         images.push_back(cv::imread("../../images/camera/large_closeup_pieces2.jpg", 1));
          //    images.push_back( cv::imread("../../images/rows/row1_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row2_shrunk.png", 1 ));
          //    images.push_back( cv::imread("../../images/rows/row3_shrunk.png", 1 ));

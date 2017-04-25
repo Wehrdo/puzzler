@@ -63,8 +63,8 @@ pair<size_t, size_t> PuzzleGUI::select_edge(Piece piece)
     finding_pt = 0;
     start_pt_idx = end_pt_idx = 0;
 
-    namedWindow(window_name, WINDOW_NORMAL);
-    resizeWindow(window_name, 560, 560);
+    namedWindow(window_name, WINDOW_AUTOSIZE);
+    resizeWindow(window_name, 1280, 720);
     // Any mouse event will call mouse_mv_cb
     setMouseCallback(window_name, mouse_cb, this);
 
@@ -194,9 +194,11 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
     double max_valid_error = piece_errors[0].second + 0.007;
 
     Scalar red(0, 0, 255);
+    Scalar white(255, 255, 255);
 
     // Images that need to be shown 
     map<uchar*, Mat> shown_images;
+    int order = 1;
     for (pair<ssize_t, float> match : piece_errors) {
         // Stop searching after error is too high
         if (match.second > max_valid_error) {
@@ -217,7 +219,9 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
         fillPoly(poly_overlay, points, &n_points, 1, red);
         polylines(poly_overlay, points, &n_points, 1, true, red, highlighted.rows / 150);
         addWeighted(highlighted, 1.0, poly_overlay, 0.8, 0, highlighted);
+        putText(highlighted, to_string(order), edge.owner_piece.contour[0], cv::FONT_HERSHEY_SIMPLEX, 0.001666667 * highlighted.rows, white, 0.002666667 * highlighted.rows);
         // add(highlighted, poly_overlay, shown_images[raw_image.data]);
+        order++;
     }
     int img_id = 0;
     for (auto highlight : shown_images) {
@@ -227,5 +231,6 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
         resizeWindow(window_name, 560, 560);
         img_id++;
     }
-    waitKey(0);
+    cout << "Highlighting " << img_id << " edges out of " << piece_errors.size() << endl;
+    while(waitKey(30) != ' ' );
 }

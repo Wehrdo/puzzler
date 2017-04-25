@@ -63,19 +63,19 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    cvtColor( img, img, CV_BGR2GRAY );
    img = img > 80;
 
-   cv::namedWindow("test", cv::WINDOW_NORMAL);
+   // cv::namedWindow("test", cv::WINDOW_NORMAL);
    // apply median filter
    dilate(1, 5, img);
-   cv::imshow("test", img);
-   while(cv::waitKey(30) != ' ' );
+   // cv::imshow("test", img);
+   // while(cv::waitKey(30) != ' ' );
    erode(1, 5, img );
-   cv::imshow("test", img);
-   while(cv::waitKey(30) != ' ' );
+   // cv::imshow("test", img);
+   // while(cv::waitKey(30) != ' ' );
    int blur_size = img.cols * 0.0055;
    blur_size += 1 - (blur_size % 2); // make odd
    cv::medianBlur(img, img, blur_size);
-   cv::imshow("test", img);
-   while(cv::waitKey(30) != ' ' );
+   // cv::imshow("test", img);
+   // while(cv::waitKey(30) != ' ' );
 
 
    // CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
