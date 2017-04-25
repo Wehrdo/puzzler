@@ -63,14 +63,17 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    cvtColor( img, img, CV_BGR2GRAY );
    img = img > 80;
 
+   cv::namedWindow("test", cv::WINDOW_NORMAL);
    // apply median filter
-   dilate(1, 3, img);
+   dilate(1, 5, img);
    cv::imshow("test", img);
    while(cv::waitKey(30) != ' ' );
-   erode(1, 3, img );
+   erode(1, 5, img );
    cv::imshow("test", img);
    while(cv::waitKey(30) != ' ' );
-   cv::medianBlur(img, img, 5);
+   int blur_size = img.cols * 0.0055;
+   blur_size += 1 - (blur_size % 2); // make odd
+   cv::medianBlur(img, img, blur_size);
    cv::imshow("test", img);
    while(cv::waitKey(30) != ' ' );
 
@@ -86,7 +89,7 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
    //  the flavors of the Teh-Chin chain approximation algorithm.
 
    // outline edges in points, store in vector
-   findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+   findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_L1 );
 
    unsigned int i;
    double average_size = 0.0;
@@ -112,7 +115,8 @@ std::vector<Piece> find_pieces( cv::Mat img, std::vector<Piece> &partials )
       Piece to_add;
       to_add.raw_image = original_image;
 
-      cv::approxPolyDP(contours[i], to_add.contour, 1, true );
+      cv::approxPolyDP(contours[i], to_add.contour, 0.8, true );
+      // to_add.contour = contours[i];
       unsigned int j;
       for( j = 0; j < to_add.contour.size(); j++ )
          {

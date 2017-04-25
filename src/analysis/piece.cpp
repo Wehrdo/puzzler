@@ -79,14 +79,19 @@ unsigned int prev_index( std::vector<T> vector, unsigned int index, bool& wrappe
       }
    }
 
-cv::Point find_tangent_angle(int idx, std::vector<cv::Point> points)
+cv::Point2f find_tangent_angle(int idx, std::vector<cv::Point> points)
    {
    int left_idx = idx == 0 ? points.size() - 1 : idx - 1;
    int right_idx = (idx + 1) % points.size();
-   return points[left_idx] - points[right_idx];
+   cv::Point2f left_pt = points[left_idx];
+   cv::Point2f this_pt = points[idx];
+   cv::Point2f right_pt = points[right_idx];
+   cv::Point2f left_vec = (this_pt - left_pt) / cv::norm(this_pt - left_pt);
+   cv::Point2f right_vec = (right_pt - this_pt) / cv::norm(right_pt - this_pt);
+   return right_vec - (-left_vec);
    }
 
-bool intersect_lines(cv::Point v1, cv::Point v2, cv::Point o1, cv::Point o2, cv::Point& intersection_pt) {
+bool intersect_lines(cv::Point2f v1, cv::Point2f v2, cv::Point2f o1, cv::Point2f o2, cv::Point& intersection_pt) {
     /* Parametric equation of a line
     p1 = o1 + v1 * u
     p2 = o2 + v2 * v
@@ -109,7 +114,8 @@ bool intersect_lines(cv::Point v1, cv::Point v2, cv::Point o1, cv::Point o2, cv:
 void Piece::characterize_curve( size_t start_idx, size_t end_idx, Curve::curve_type type )
    {
 
-   cv::Point start_slp, end_slp, start, end, ins_pt;
+   cv::Point2f start_slp, end_slp;
+   cv::Point start, end, ins_pt;
 
    // Is the curve at least 3 points?
    ssize_t n_points = start_idx < end_idx ? end_idx - start_idx + 1 : 
@@ -290,6 +296,10 @@ void Piece::draw( unsigned int width, bool with_image )
       cv::Point infl_pt = convert_coord( contour[idx] );
       cv::circle(out_img, infl_pt, 10, white);
       cv::putText( out_img, std::to_string(idx), infl_pt + cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, white );
+      cv::Point2f tangent = find_tangent_angle(idx, contour);
+      cv::Point2i tangent_px = tangent * 20;
+      cv::line(out_img, infl_pt, infl_pt + tangent_px, red);
+      cv::line(out_img, infl_pt, infl_pt - tangent_px, red);
       }
 
    int count = 0;

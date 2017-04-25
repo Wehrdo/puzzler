@@ -80,12 +80,21 @@ float Edge::compare(const Edge &that)
     double data[2][3] = {{1, 0, (double)translate_amt.x}, {0, 1, (double)translate_amt.y}};
     Mat trans_mat(2, 3, CV_64F, data);
 
+   //  namedWindow("itsawindow");
+   //  imshow("itsawindow", draw_curve(that.points, 480));
+   //  waitKey(0);
+
     // Translate then rotate
     vector<Point> moved_pts;
     // vector<Point> moved_pts(that.points.begin(), that.points.end());
     transform(that.points, moved_pts, trans_mat);
     // cout << "Rotating by " << amt_to_rotate * RAD_TO_DEG << endl;
     transform(moved_pts, moved_pts, rot_mat);
+
+    vector<Point> all_aligned_pts(moved_pts.begin(), moved_pts.end());
+    all_aligned_pts.insert(all_aligned_pts.begin(), points.begin(), points.end());
+   //  imshow("itsawindow", draw_curve(all_aligned_pts, 480));
+   //  waitKey(0);
 
     // Copy and reverse these points
     vector<Point> static_pts(points.begin(), points.end());
@@ -96,7 +105,7 @@ float Edge::compare(const Edge &that)
     to_3d_set(static_pts, a6);
     to_3d_set(moved_pts, b6);
 
-    cv::ppf_match_3d::ICP icp(100, 0.1, 2.5, 4);
+    cv::ppf_match_3d::ICP icp(100, 0.15 , 2.5, 4);
     double pose[16];
     double error;
     int failure = 0;
@@ -123,9 +132,8 @@ float Edge::compare(const Edge &that)
     cout << "Error = " << error << endl;
     cout << "pose4 = " << endl << pose4 << endl;
     cout << "opt_tran = " << endl << opt_tran << endl;
-    // namedWindow("itsawindow");
-    // Mat moved_curve = draw_curve(all_pts, 480);
-    // imshow("itsawindow", moved_curve);
-    // waitKey(0);
+    Mat moved_curve = draw_curve(all_pts, 480);
+   //  imshow("itsawindow", moved_curve);
+   //  waitKey(0);
     return error;
 }

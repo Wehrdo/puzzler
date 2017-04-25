@@ -169,7 +169,7 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
     // }
 
     // Found no matches
-    if (piece_errors[0].first == INFINITY) {
+    if (piece_errors[0].second == INFINITY) {
         cout << "Sorry, found no matches." << endl;
         return;
     }
@@ -190,7 +190,8 @@ void highlight_matches(Edge match_edge, std::vector<Edge> potential) {
     mean_x2 /= n_valid;
     double stdev = sqrt(mean_x2 - (mean_x * mean_x));
     // Allow up to 0.5 standard deviations above minimum error
-    double max_valid_error = piece_errors[0].second + 0.4*stdev;
+   //  double max_valid_error = piece_errors[0].second + 0.4*stdev;
+    double max_valid_error = piece_errors[0].second + 0.007;
 
     Scalar red(0, 0, 255);
 
